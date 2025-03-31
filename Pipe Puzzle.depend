@@ -1,0 +1,53 @@
+# depslib dependency file v1.0
+1742625173 source:c:\users\admin\desktop\pipe puzzle\main.cpp
+	<iostream>
+	<SDL.h>
+	<SDL_image.h>
+	<vector>
+	<cstdlib>
+	<ctime>
+	<SDL_mixer.h>
+	"graphic.h"
+	"defs.h"
+
+1742614646 c:\users\admin\desktop\pipe puzzle\graphic.h
+	<iostream>
+	<SDL.h>
+	<SDL_image.h>
+	<vector>
+	<cstdlib>
+	<ctime>
+	<SDL_mixer.h>
+
+1742618716 c:\users\admin\desktop\pipe puzzle\defs.h
+
+1742678339 source:c:\users\admin\desktop\pipe puzzle\pipe.cpp
+	"graphic.h"
+	"defs.h"
+
+1743372831 source:c:\users\admin\onedrive\máy tính\pipe puzzle\main.cpp
+	<iostream>
+	<SDL.h>
+	<SDL_image.h>
+	<vector>
+	<cstdlib>
+	<ctime>
+	<SDL_mixer.h>
+	"graphic.h"
+	"defs.h"
+
+1743372831 c:\users\admin\onedrive\máy tính\pipe puzzle\graphic.h
+	<iostream>
+	<SDL.h>
+	<SDL_image.h>
+	<vector>
+	<cstdlib>
+	<ctime>
+	<SDL_mixer.h>
+
+1743372831 c:\users\admin\onedrive\máy tính\pipe puzzle\defs.h
+
+1743372831 source:c:\users\admin\onedrive\máy tính\pipe puzzle\pipe.cpp
+	"graphic.h"
+	"defs.h"
+
