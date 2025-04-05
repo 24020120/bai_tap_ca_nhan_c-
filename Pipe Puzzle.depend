@@ -51,3 +51,30 @@
 	"graphic.h"
 	"defs.h"
 
+1743826164 source:c:\users\admin\onedrive\máy tính\baitaplon\pipe puzzle\main.cpp
+	<iostream>
+	<SDL.h>
+	<SDL_image.h>
+	<vector>
+	<cstdlib>
+	<ctime>
+	<SDL_mixer.h>
+	<SDL_ttf.h>
+	"graphic.h"
+	"defs.h"
+
+1743814471 c:\users\admin\onedrive\máy tính\baitaplon\pipe puzzle\graphic.h
+	<iostream>
+	<SDL.h>
+	<SDL_image.h>
+	<vector>
+	<cstdlib>
+	<ctime>
+	<SDL_mixer.h>
+
+1743822912 c:\users\admin\onedrive\máy tính\baitaplon\pipe puzzle\defs.h
+
+1743826177 source:c:\users\admin\onedrive\máy tính\baitaplon\pipe puzzle\pipe.cpp
+	"graphic.h"
+	"defs.h"
+
