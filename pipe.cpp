@@ -1,28 +1,26 @@
 #include "graphic.h"
 #include "defs.h"
-
-int showMenu(SDL_Renderer* renderer) {
-    SDL_Texture* menuBg = IMG_LoadTexture(renderer, "images/background.png");
-    SDL_Texture* startBtn = IMG_LoadTexture(renderer, "images/start.png");
-    SDL_Texture* guideBtn = IMG_LoadTexture(renderer, "images/guide.png");
-    SDL_Texture* settingsBtn = IMG_LoadTexture(renderer, "images/settings.png");
-    SDL_Texture* exitBtn = IMG_LoadTexture(renderer, "images/exit.png");
-
-    const int btnWidth = 100;
-    const int btnHeight = 100;
-    const int margin = 50;
-    const int centerX = windowSize / 2;
-    const int centerY = windowSize / 2;
-    SDL_Rect startRect = {centerX - btnWidth - margin / 2, centerY - btnHeight - margin / 2, btnWidth, btnHeight};
-    SDL_Rect guideRect = {centerX - btnWidth - margin / 2, centerY + margin / 2, btnWidth, btnHeight};
-    SDL_Rect settingsRect = {centerX + margin / 2, centerY - btnHeight - margin / 2, btnWidth, btnHeight};
-    SDL_Rect exitRect = {centerX + margin / 2, centerY + margin / 2, btnWidth, btnHeight};
-    SDL_Rect backgroundRect = {0, 0, windowSize, windowSize};
-
+#include <SDL_image.h>
+#include <SDL_mixer.h>
+#include <vector>
+int showMenu(SDL_Renderer* ren) {
+    SDL_Texture* bg = IMG_LoadTexture(ren, "images/background.png");
+    SDL_Texture* btnStart = IMG_LoadTexture(ren,"images/start.png");
+    SDL_Texture* btnGuide = IMG_LoadTexture(ren,"images/guide.png");
+    SDL_Texture* btnSet = IMG_LoadTexture(ren,"images/settings.png");
+    SDL_Texture* btnExit = IMG_LoadTexture(ren,"images/exit.png");
+    const int BW=100;
+    const int BH=100;
+    const int GAP=50;
+    const int cx=winSize/2;
+    const int cy=winSize/2;
+    SDL_Rect rStart ={cx-BW-GAP/2,cy-BH-GAP/2,BW,BH};
+    SDL_Rect rGuide ={cx-BW-GAP/2,cy+GAP/2,BW,BH};
+    SDL_Rect rSet ={cx+GAP/2,cy-BH-GAP/2,BW,BH};
+    SDL_Rect rExit ={cx + GAP/2,cy+GAP/2,BW,BH};
+    SDL_Rect rBg ={0,0,winSize,winSize};
     bool running = true;
-    int selected = NONE;
-
-    extern bool musicMuted; // Truy cập biến toàn cục
+    int choice = NONE;
 
     while (running) {
         SDL_Event e;
@@ -31,251 +29,218 @@ int showMenu(SDL_Renderer* renderer) {
 
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
-                selected = EXIT;
+                choice = EXIT;
                 running = false;
-            }
-            if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+            } else if (e.type ==SDL_MOUSEBUTTONDOWN&& e.button.button == SDL_BUTTON_LEFT) {
                 mx = e.button.x;
                 my = e.button.y;
-                if (mx >= startRect.x && mx <= startRect.x + startRect.w && my >= startRect.y && my <= startRect.y + startRect.h) {
-                    selected = START;
+                if (mx >= rStart.x && mx <= rStart.x + rStart.w && my >= rStart.y && my <= rStart.y + rStart.h) {
+                    choice = START;
                     running = false;
-                } else if (mx >= guideRect.x && mx <= guideRect.x + guideRect.w && my >= guideRect.y && my <= guideRect.y + guideRect.h) {
-                    selected = GUIDE;
-                } else if (mx >= settingsRect.x && mx <= settingsRect.x + settingsRect.w && my >= settingsRect.y && my <= settingsRect.y + settingsRect.h) {
-                    showSettings(renderer, musicMuted); // Gọi menu Settings
-                } else if (mx >= exitRect.x && mx <= exitRect.x + exitRect.w && my >= exitRect.y && my <= exitRect.y + exitRect.h) {
-                    selected = EXIT;
+                } else if (mx >= rGuide.x && mx <= rGuide.x + rGuide.w && my >= rGuide.y && my <= rGuide.y + rGuide.h) {
+                    choice = GUIDE;
+                } else if (mx >= rSet.x && mx <= rSet.x + rSet.w && my >= rSet.y && my <= rSet.y + rSet.h) {
+                    showSettings(ren, mute);
+                } else if (mx >= rExit.x && mx <= rExit.x + rExit.w && my >= rExit.y && my <= rExit.y + rExit.h) {
+                    choice = EXIT;
                     running = false;
                 }
             }
         }
-
-        SDL_SetTextureColorMod(startBtn, 255, 255, 255);
-        SDL_SetTextureColorMod(guideBtn, 255, 255, 255);
-        SDL_SetTextureColorMod(settingsBtn, 255, 255, 255);
-        SDL_SetTextureColorMod(exitBtn, 255, 255, 255);
-
-        if (mx >= startRect.x && mx <= startRect.x + startRect.w && my >= startRect.y && my <= startRect.y + startRect.h) {
-            SDL_SetTextureColorMod(startBtn, 255, 255, 0);
-        } else if (mx >= guideRect.x && mx <= guideRect.x + guideRect.w && my >= guideRect.y && my <= guideRect.y + guideRect.h) {
-            SDL_SetTextureColorMod(guideBtn, 255, 255, 0);
-        } else if (mx >= settingsRect.x && mx <= settingsRect.x + settingsRect.w && my >= settingsRect.y && my <= settingsRect.y + settingsRect.h) {
-            SDL_SetTextureColorMod(settingsBtn, 255, 255, 0);
-        } else if (mx >= exitRect.x && mx <= exitRect.x + exitRect.w && my >= exitRect.y && my <= exitRect.y + exitRect.h) {
-            SDL_SetTextureColorMod(exitBtn, 255, 255, 0);
+        SDL_SetTextureColorMod(btnStart, 255, 255, 255);
+        SDL_SetTextureColorMod(btnGuide, 255, 255, 255);
+        SDL_SetTextureColorMod(btnSet, 255, 255, 255);
+        SDL_SetTextureColorMod(btnExit, 255, 255, 255);
+        if (mx >= rStart.x && mx <= rStart.x + rStart.w && my >= rStart.y && my <= rStart.y + rStart.h) {
+            SDL_SetTextureColorMod(btnStart, 255, 255, 0);
+        } else if (mx >= rGuide.x && mx <= rGuide.x + rGuide.w && my >= rGuide.y && my <= rGuide.y + rGuide.h) {
+            SDL_SetTextureColorMod(btnGuide, 255, 255, 0);
+        } else if (mx >= rSet.x && mx <= rSet.x + rSet.w && my >= rSet.y && my <= rSet.y + rSet.h) {
+            SDL_SetTextureColorMod(btnSet, 255, 255, 0);
+        } else if (mx >= rExit.x && mx <= rExit.x + rExit.w && my >= rExit.y && my <= rExit.y + rExit.h) {
+            SDL_SetTextureColorMod(btnExit, 255, 255, 0);
         }
 
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, menuBg, NULL, &backgroundRect);
-        SDL_RenderCopy(renderer, startBtn, NULL, &startRect);
-        SDL_RenderCopy(renderer, guideBtn, NULL, &guideRect);
-        SDL_RenderCopy(renderer, settingsBtn, NULL, &settingsRect);
-        SDL_RenderCopy(renderer, exitBtn, NULL, &exitRect);
-        SDL_RenderPresent(renderer);
+        SDL_RenderClear(ren);
+        SDL_RenderCopy(ren, bg, nullptr, &rBg);
+        SDL_RenderCopy(ren, btnStart, nullptr, &rStart);
+        SDL_RenderCopy(ren, btnGuide, nullptr, &rGuide);
+        SDL_RenderCopy(ren, btnSet, nullptr, &rSet);
+        SDL_RenderCopy(ren, btnExit, nullptr, &rExit);
+        SDL_RenderPresent(ren);
     }
-
-    SDL_DestroyTexture(menuBg);
-    SDL_DestroyTexture(startBtn);
-    SDL_DestroyTexture(guideBtn);
-    SDL_DestroyTexture(settingsBtn);
-    SDL_DestroyTexture(exitBtn);
-
-    return selected;
+    SDL_DestroyTexture(bg);
+    SDL_DestroyTexture(btnStart);
+    SDL_DestroyTexture(btnGuide);
+    SDL_DestroyTexture(btnSet);
+    SDL_DestroyTexture(btnExit);
+    return choice;
+}
+Pipe& getPipe(int x, int y) {
+    return grid[y][x];
 }
 
-pipe& cell(const SDL_Point &v) {
-    return grid[v.y][v.x];
+bool out(const SDL_Point& pos) {
+    return pos.x<0||pos.x>=gridSize||pos.y<0||pos.y>=gridSize;
 }
-
-bool isOut(const SDL_Point &v) {
-    if (v.x < 0 || v.x >= N) return true;
-    if (v.y < 0 || v.y >= N) return true;
-    return false;
-}
-
-void generatePuzzle() {
+void genGrid() {
     std::vector<SDL_Point> nodes;
-    SDL_Point start = { rand() % N, rand() % N };
+    SDL_Point start = {rand()%gridSize,rand()%gridSize};
     nodes.push_back(start);
+    while (!nodes.empty()){
+        int i=rand()%nodes.size();
+        SDL_Point pos=nodes[i];
+        SDL_Point dir=DIR[rand()%4];
+        Pipe& p=getPipe(pos.x,pos.y);
 
-    while (!nodes.empty()) {
-        int n = rand() % nodes.size();
-        SDL_Point v = nodes[n];
-        SDL_Point d = DIR[rand() % 4];
-        pipe &p = cell(v);
-        if (p.dirs.size() == 3) {
-            nodes.erase(nodes.begin() + n);
+        if (p.dirs.size()==3) {
+            nodes.erase(nodes.begin()+i);
             continue;
         }
-        if (p.dirs.size() == 2) {
-            if (rand() % 50 != 0) continue;
+        if (p.dirs.size()==2&&rand()%50!=0) {
+            continue;
         }
-        bool complete = true;
-        for (auto &D : DIR) {
-            SDL_Point adj = { v.x + D.x, v.y + D.y };
-            if (!isOut(adj) && cell(adj).dirs.empty()) {
-                complete = false;
+        bool done=true;
+        for (const auto&d :DIR) {
+            SDL_Point next = {pos.x+d.x,pos.y+d.y};
+            if (!out(next) && getPipe(next.x,next.y).dirs.empty()) {
+                done = false;
                 break;
             }
         }
-        if (complete) {
-            nodes.erase(nodes.begin() + n);
+        if (done) {
+            nodes.erase(nodes.begin() + i);
             continue;
         }
-        SDL_Point to = { v.x + d.x, v.y + d.y };
-        if (isOut(to)) continue;
-        if (!cell(to).dirs.empty()) continue;
-        p.dirs.push_back(d);
-        cell(to).dirs.push_back({ -d.x, -d.y });
+        SDL_Point to = {pos.x + dir.x, pos.y + dir.y};
+        if (out(to) || !getPipe(to.x, to.y).dirs.empty()) {
+            continue;
+        }
+        p.dirs.push_back(dir);
+        getPipe(to.x, to.y).dirs.push_back({-dir.x, -dir.y});
         nodes.push_back(to);
     }
 }
-
-int showSettings(SDL_Renderer* renderer, bool& musicMuted) {
-    SDL_Texture* settingsBg = IMG_LoadTexture(renderer, "images/background.png");
-    SDL_Texture* muteBtn = IMG_LoadTexture(renderer, "images/mute.png");
-    SDL_Texture* unmuteBtn = IMG_LoadTexture(renderer, "images/unmute.png");
-    SDL_Texture* backBtn = IMG_LoadTexture(renderer, "images/back.png");
-
-    const int btnWidth = 70;
-    const int btnHeight = 70;
-    const int margin = 50;
-    const int centerX = windowSize / 2;
-    const int centerY = windowSize / 2;
-    SDL_Rect muteRect = {centerX - btnWidth / 2, centerY - btnHeight - margin / 2, btnWidth, btnHeight}; // Căn giữa
-    SDL_Rect backRect = {centerX - btnWidth / 2, centerY + margin / 2, btnWidth, btnHeight}; // Căn giữa
-    SDL_Rect backgroundRect = {0, 0, windowSize, windowSize};
-
-    bool running = true;
-    int selected = NONE;
-
+int showSettings(SDL_Renderer* ren, bool& mute) {
+    SDL_Texture* bg=IMG_LoadTexture(ren,"images/background.png");
+    SDL_Texture* btnMute=IMG_LoadTexture(ren,"images/mute.png");
+    SDL_Texture* btnUnmute=IMG_LoadTexture(ren,"images/unmute.png");
+    SDL_Texture* btnBack=IMG_LoadTexture(ren,"images/back.png");
+    const int BW=70;
+    const int BH=70;
+    const int GAP=50;
+    const int cx=winSize/2;
+    const int cy=winSize/2;
+    SDL_Rect rMute={cx-BW/2,cy-BH-GAP/2,BW,BH};
+    SDL_Rect rBack={cx-BW/2,cy+GAP/2,BW,BH};
+    SDL_Rect rBg={0,0,winSize,winSize};
+    bool running=true;
+    int choice=NONE;
     while (running) {
         SDL_Event e;
         int mx, my;
         SDL_GetMouseState(&mx, &my);
-
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
-                selected = EXIT;
+                choice = EXIT;
                 running = false;
-            }
-            if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+            } else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
                 mx = e.button.x;
                 my = e.button.y;
-                if (mx >= muteRect.x && mx <= muteRect.x + muteRect.w && my >= muteRect.y && my <= muteRect.y + muteRect.h) {
-                    musicMuted = !musicMuted;
-                    if (musicMuted) {
-                        Mix_VolumeMusic(0);
-                    } else {
-                        Mix_VolumeMusic(MIX_MAX_VOLUME);
-                    }
-                } else if (mx >= backRect.x && mx <= backRect.x + backRect.w && my >= backRect.y && my <= backRect.y + backRect.h) {
-                    selected = NONE;
+                if (mx >= rMute.x && mx <= rMute.x + rMute.w && my >= rMute.y && my <= rMute.y + rMute.h) {
+                    mute = !mute;
+                    Mix_VolumeMusic(mute ? 0 : MIX_MAX_VOLUME);
+                } else if (mx >= rBack.x && mx <= rBack.x + rBack.w && my >= rBack.y && my <= rBack.y + rBack.h) {
+                    choice = NONE;
                     running = false;
                 }
             }
         }
-
-        SDL_SetTextureColorMod(musicMuted ? unmuteBtn : muteBtn, 255, 255, 255);
-        SDL_SetTextureColorMod(backBtn, 255, 255, 255);
-
-        if (mx >= muteRect.x && mx <= muteRect.x + muteRect.w && my >= muteRect.y && my <= muteRect.y + muteRect.h) {
-            SDL_SetTextureColorMod(musicMuted ? unmuteBtn : muteBtn, 255, 255, 0);
-        } else if (mx >= backRect.x && mx <= backRect.x + backRect.w && my >= backRect.y && my <= backRect.y + backRect.h) {
-            SDL_SetTextureColorMod(backBtn, 255, 255, 0);
+        SDL_SetTextureColorMod(mute ? btnUnmute : btnMute, 255, 255, 255);
+        SDL_SetTextureColorMod(btnBack,255,255,255);
+        if (mx >= rMute.x && mx <= rMute.x + rMute.w && my >= rMute.y && my <= rMute.y + rMute.h) {
+            SDL_SetTextureColorMod(mute ? btnUnmute : btnMute, 255, 255, 0);
+        } else if (mx >= rBack.x && mx <= rBack.x + rBack.w && my >= rBack.y && my <= rBack.y + rBack.h) {
+            SDL_SetTextureColorMod(btnBack, 255, 255, 0);
         }
-
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, settingsBg, NULL, &backgroundRect);
-        SDL_RenderCopy(renderer, musicMuted ? unmuteBtn : muteBtn, NULL, &muteRect);
-        SDL_RenderCopy(renderer, backBtn, NULL, &backRect);
-        SDL_RenderPresent(renderer);
+        SDL_RenderClear(ren);
+        SDL_RenderCopy(ren, bg, nullptr, &rBg);
+        SDL_RenderCopy(ren, mute ? btnUnmute : btnMute, nullptr, &rMute);
+        SDL_RenderCopy(ren, btnBack, nullptr, &rBack);
+        SDL_RenderPresent(ren);
     }
-
-    SDL_DestroyTexture(settingsBg);
-    SDL_DestroyTexture(muteBtn);
-    SDL_DestroyTexture(unmuteBtn);
-    SDL_DestroyTexture(backBtn);
-
-    return selected;
+    SDL_DestroyTexture(bg);
+    SDL_DestroyTexture(btnMute);
+    SDL_DestroyTexture(btnUnmute);
+    SDL_DestroyTexture(btnBack);
+    return choice;
 }
-
-int showVictoryScreen(SDL_Renderer* renderer) {
-    SDL_Texture* victoryBg = IMG_LoadTexture(renderer, "images/background.png");
-    SDL_Texture* replayBtn = IMG_LoadTexture(renderer, "images/replay.png");
-    SDL_Texture* exitBtn = IMG_LoadTexture(renderer, "images/exit.png");
-    SDL_Texture* gameover = IMG_LoadTexture(renderer, "images/TimeUp.png");
-    const int btnWidth = 70;
-    const int btnHeight = 70;
-    const int margin = 50;
-    const int centerX = windowSize / 2;
-    const int centerY = windowSize / 2;
-    SDL_Rect gameoverRect = {centerX - 100,centerY - 200,200,100};
-    SDL_Rect replayRect = {centerX - btnWidth - margin / 2,centerY - btnHeight / 2 + 50,btnWidth, btnHeight};
-    SDL_Rect exitRect = {centerX + margin / 2,centerY - btnHeight / 2 + 50,btnWidth, btnHeight};
-    SDL_Rect backgroundRect = {0, 0, windowSize, windowSize};
-    bool running = true;
-    int selected = NONE;
-    while (running) {
+int showWin(SDL_Renderer* ren) {
+    SDL_Texture* bg = IMG_LoadTexture(ren,"images/background.png");
+    SDL_Texture* btnReplay = IMG_LoadTexture(ren,"images/replay.png");
+    SDL_Texture* btnExit = IMG_LoadTexture(ren,"images/exit.png");
+    SDL_Texture* winTex = IMG_LoadTexture(ren,"images/TimeUp.png");
+    const int BW=70;
+    const int BH=70;
+    const int GAP=50;
+    const int cx=winSize/2;
+    const int cy=winSize/2;
+    SDL_Rect rWin={cx-100,cy-200,200,100};
+    SDL_Rect rReplay={cx-BW-GAP/2,cy-BH/2+50,BW,BH};
+    SDL_Rect rExit={cx+GAP/2,cy-BH/2+50,BW,BH};
+    SDL_Rect rBg={0,0,winSize,winSize};
+    bool running=true;
+    int choice=NONE;
+    while(running){
         SDL_Event e;
-        int mx, my;
-        SDL_GetMouseState(&mx, &my);
-
+        int mx,my;
+        SDL_GetMouseState(&mx,&my);
         while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_QUIT) {
-                selected = EXIT;
-                running = false;
-            }
-            if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
-                mx = e.button.x;
-                my = e.button.y;
-                if (mx >= replayRect.x && mx <= replayRect.x + replayRect.w && my >= replayRect.y && my <= replayRect.y + replayRect.h) {
-                    selected = REPLAY;
+            if (e.type==SDL_QUIT) {
+                choice=EXIT;
+                running=false;
+            } else if(e.type==SDL_MOUSEBUTTONDOWN&&e.button.button==SDL_BUTTON_LEFT) {
+                mx=e.button.x;
+                my=e.button.y;
+                if (mx>=rReplay.x &&mx<= rReplay.x + rReplay.w && my >= rReplay.y && my <= rReplay.y + rReplay.h) {
+                    choice = REPLAY;
                     running = false;
-                } else if (mx >= exitRect.x && mx <= exitRect.x + exitRect.w && my >= exitRect.y && my <= exitRect.y + exitRect.h) {
-                    selected = EXIT;
+                } else if (mx >= rExit.x && mx <= rExit.x + rExit.w && my >= rExit.y && my <= rExit.y + rExit.h) {
+                    choice = EXIT;
                     running = false;
                 }
             }
         }
-
-        SDL_SetTextureColorMod(replayBtn, 255, 255, 255);
-        SDL_SetTextureColorMod(exitBtn, 255, 255, 255);
-
-        if (mx >= replayRect.x && mx <= replayRect.x + replayRect.w && my >= replayRect.y && my <= replayRect.y + replayRect.h) {
-            SDL_SetTextureColorMod(replayBtn, 255, 255, 0);
-        } else if (mx >= exitRect.x && mx <= exitRect.x + exitRect.w && my >= exitRect.y && my <= exitRect.y + exitRect.h) {
-            SDL_SetTextureColorMod(exitBtn, 255, 255, 0);
+        SDL_SetTextureColorMod(btnReplay, 255, 255, 255);
+        SDL_SetTextureColorMod(btnExit, 255, 255, 255);
+        if (mx >= rReplay.x && mx <= rReplay.x + rReplay.w && my >= rReplay.y && my <= rReplay.y + rReplay.h) {
+            SDL_SetTextureColorMod(btnReplay, 255, 255, 0);
+        } else if (mx >= rExit.x && mx <= rExit.x + rExit.w && my >= rExit.y && my <= rExit.y + rExit.h) {
+            SDL_SetTextureColorMod(btnExit, 255, 255, 0);
         }
-
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, victoryBg, NULL, &backgroundRect);
-        SDL_RenderCopy(renderer, gameover, NULL, &gameoverRect); // Hiển thị texture gameover
-        SDL_RenderCopy(renderer, replayBtn, NULL, &replayRect);
-        SDL_RenderCopy(renderer, exitBtn, NULL, &exitRect);
-        SDL_RenderPresent(renderer);
+        SDL_RenderClear(ren);
+        SDL_RenderCopy(ren, bg, nullptr, &rBg);
+        SDL_RenderCopy(ren, winTex, nullptr, &rWin);
+        SDL_RenderCopy(ren, btnReplay, nullptr, &rReplay);
+        SDL_RenderCopy(ren, btnExit, nullptr, &rExit);
+        SDL_RenderPresent(ren);
     }
-
-    SDL_DestroyTexture(victoryBg);
-    SDL_DestroyTexture(replayBtn);
-    SDL_DestroyTexture(exitBtn);
-    SDL_DestroyTexture(gameover);
-
-    return selected;
+    SDL_DestroyTexture(bg);
+    SDL_DestroyTexture(btnReplay);
+    SDL_DestroyTexture(btnExit);
+    SDL_DestroyTexture(winTex);
+    return choice;
 }
 
-void drop(const SDL_Point &v) {
-    pipe &p = cell(v);
+void flood(const SDL_Point& pos) {
+    Pipe& p = getPipe(pos.x, pos.y);
     if (p.on) return;
     p.on = true;
 
-    for (auto &d : DIR) {
-        SDL_Point to = {v.x + d.x, v.y + d.y};
-        if (!isOut(to)) {
-            if (p.isConnect(d) && cell(to).isConnect({-d.x, -d.y})) {
-                drop(to);
-            }
+    for (const auto& d : DIR) {
+        SDL_Point next = {pos.x + d.x, pos.y + d.y};
+        if (!out(next) && p.hasDir(d) && getPipe(next.x, next.y).hasDir({-d.x, -d.y})) {
+            flood(next);
         }
     }
 }

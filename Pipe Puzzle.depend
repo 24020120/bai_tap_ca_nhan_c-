@@ -25,31 +25,31 @@
 	"graphic.h"
 	"defs.h"
 
-1743372831 source:c:\users\admin\onedrive\máy tính\pipe puzzle\main.cpp
+1744420596 source:c:\users\admin\onedrive\máy tính\pipe puzzle\main.cpp
 	<iostream>
 	<SDL.h>
 	<SDL_image.h>
+	<SDL_mixer.h>
+	<SDL_ttf.h>
 	<vector>
 	<cstdlib>
 	<ctime>
-	<SDL_mixer.h>
 	"graphic.h"
 	"defs.h"
 
-1743372831 c:\users\admin\onedrive\máy tính\pipe puzzle\graphic.h
-	<iostream>
+1744424366 c:\users\admin\onedrive\máy tính\pipe puzzle\graphic.h
+	<vector>
 	<SDL.h>
-	<SDL_image.h>
-	<vector>
-	<cstdlib>
-	<ctime>
-	<SDL_mixer.h>
 
-1743372831 c:\users\admin\onedrive\máy tính\pipe puzzle\defs.h
+1744416097 c:\users\admin\onedrive\máy tính\pipe puzzle\defs.h
+	<SDL.h>
 
-1743372831 source:c:\users\admin\onedrive\máy tính\pipe puzzle\pipe.cpp
+1744416809 source:c:\users\admin\onedrive\máy tính\pipe puzzle\pipe.cpp
 	"graphic.h"
 	"defs.h"
+	<SDL_image.h>
+	<SDL_mixer.h>
+	<vector>
 
 1743826164 source:c:\users\admin\onedrive\máy tính\baitaplon\pipe puzzle\main.cpp
 	<iostream>

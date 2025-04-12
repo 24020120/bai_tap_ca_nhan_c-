@@ -1,35 +1,33 @@
 #ifndef GRAPHIC_H
 #define GRAPHIC_H
-#include <iostream>
-#include <SDL.h>
-#include <SDL_image.h>
 #include <vector>
-#include <cstdlib>
-#include <ctime>
-#include <SDL_mixer.h>
-
-struct pipe {
+#include <SDL.h>
+struct Pipe {
     std::vector<SDL_Point> dirs;
-    int orientation;
+    int dir;
     float angle;
     bool on;
-    pipe() : orientation(0), angle(0.0f), on(false) {}
+    Pipe() : dir(0), angle(0.0f), on(false) {}
     void rotate() {
-        for (auto &d : dirs) {
-            if (d.x == 0 && d.y == -1) { d.x = 1; d.y = 0; }
-            else if (d.x == 1 && d.y == 0) { d.x = 0; d.y = 1; }
-            else if (d.x == 0 && d.y == 1) { d.x = -1; d.y = 0; }
-            else if (d.x == -1 && d.y == 0) { d.x = 0; d.y = -1; }
+        for (auto& d:dirs) {
+            if(d.x==0&&d.y==-1){
+                d.x=1;d.y=0;}
+            else if(d.x==1&&d.y==0){
+                 d.x=0;d.y=1;}
+            else if(d.x==0&&d.y==1){
+                d.x=-1;d.y=0; }
+            else if(d.x==-1&&d.y==0)
+            {
+            d.x=0;d.y=-1;}
         }
     }
-    bool isConnect(SDL_Point dir) {
-        for (auto &d : dirs) {
-            if (d.x == dir.x && d.y == dir.y) return true;
+    bool hasDir(SDL_Point d) const {
+        for (const auto&dir:dirs) {
+            if (dir.x==d.x&&dir.y==d.y)
+                return true;
         }
         return false;
     }
 };
-
-extern std::vector<std::vector<pipe>> grid; // Chỉ khai báo, không định nghĩa
-
+extern std::vector<std::vector<Pipe>> grid;
 #endif
