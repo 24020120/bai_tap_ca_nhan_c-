@@ -2,14 +2,14 @@
 #define GRAPHIC_H
 #include <vector>
 #include <SDL.h>
-struct Pipe {
+struct Pipe{
     std::vector<SDL_Point> dirs;
     int dir;
     float angle;
     bool on;
     Pipe() : dir(0), angle(0.0f), on(false) {}
     void rotate() {
-        for (auto& d:dirs) {
+        for (auto& d:dirs){
             if(d.x==0&&d.y==-1){
                 d.x=1;d.y=0;}
             else if(d.x==1&&d.y==0){
