@@ -20,5 +20,6 @@ bool out(const SDL_Point&pos);
 void flood(const SDL_Point&pos);
 int showMenu(SDL_Renderer*ren);
 int showSettings(SDL_Renderer*ren,bool& mute);
+int showGuide(SDL_Renderer*ren);
 int showWin(SDL_Renderer*ren);
 #endif

@@ -36,7 +36,7 @@ int showMenu(SDL_Renderer* ren) {
                     choice=START;
                     running=false;
                 } else if(mx>=rGuide.x&&mx<=rGuide.x+rGuide.w&&my>=rGuide.y&&my<=rGuide.y+rGuide.h) {
-                    choice=GUIDE;
+                    showGuide(ren);
                 } else if(mx>=rSet.x&&mx<=rSet.x+rSet.w&&my>=rSet.y&&my<=rSet.y+rSet.h) {
                     showSettings(ren,mute);
                 } else if(mx>=rExit.x&&mx<=rExit.x+rExit.w&&my>=rExit.y&&my<=rExit.y+rExit.h) {
@@ -170,6 +170,54 @@ int showSettings(SDL_Renderer* ren, bool& mute) {
     SDL_DestroyTexture(btnBack);
     return choice;
 }
+
+int showGuide(SDL_Renderer* ren) {
+    SDL_Texture* bg = IMG_LoadTexture(ren, "images/backgroundGuide.png");
+    //SDL_Texture* guideTex = IMG_LoadTexture(ren, "images/guide.png");
+    SDL_Texture* btnBack = IMG_LoadTexture(ren, "images/back.png");
+    const int BW = 70;
+    const int BH = 70;
+    const int GAP = 50;
+    const int cx = winSize / 2;
+    const int cy = winSize / 2;
+    SDL_Rect rBack={cx-BW/2,cy+GAP/2+100,BW,BH};
+    //SDL_Rect rGuide={cx-150,cy-150,300,300};
+    SDL_Rect rBg={0,0,winSize,winSize};
+    bool running = true;
+    int choice = NONE;
+    while (running) {
+        SDL_Event e;
+        int mx, my;
+        SDL_GetMouseState(&mx, &my);
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_QUIT) {
+                choice = EXIT;
+                running = false;
+            } else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+                mx = e.button.x;
+                my = e.button.y;
+                if (mx >= rBack.x && mx <= rBack.x + rBack.w && my >= rBack.y && my <= rBack.y + rBack.h) {
+                    choice = NONE;
+                    running = false;
+                }
+            }
+        }
+        SDL_SetTextureColorMod(btnBack, 255, 255, 255);
+        if (mx >= rBack.x && mx <= rBack.x + rBack.w && my >= rBack.y && my <= rBack.y + rBack.h) {
+            SDL_SetTextureColorMod(btnBack, 255, 255, 0);
+        }
+        SDL_RenderClear(ren);
+        SDL_RenderCopy(ren, bg, nullptr, &rBg);
+        //SDL_RenderCopy(ren, guideTex, nullptr, &rGuide);
+        SDL_RenderCopy(ren, btnBack, nullptr, &rBack);
+        SDL_RenderPresent(ren);
+    }
+    SDL_DestroyTexture(bg);
+    //SDL_DestroyTexture(guideTex);
+    SDL_DestroyTexture(btnBack);
+    return choice;
+}
+
 int showWin(SDL_Renderer* ren) {
     SDL_Texture*bg=IMG_LoadTexture(ren,"images/background.png");
     SDL_Texture*btnReplay=IMG_LoadTexture(ren,"images/replay.png");

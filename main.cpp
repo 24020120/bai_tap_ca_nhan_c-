@@ -22,17 +22,17 @@ int main(int argc,char* argv[]) {
     }
     SDL_Window*win=SDL_CreateWindow("The Pipe Puzzle",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,winSize,winSize,SDL_WINDOW_SHOWN);
     SDL_Renderer*ren=SDL_CreateRenderer(win,-1,SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-
+/*
     if (TTF_Init() == -1) {
-    std::cout << "Lỗi khởi tạo SDL_ttf\n";
-    return -1;
-}
-    TTF_Font* font = TTF_OpenFont("arial.ttf", 24);
-    if (!font) {
-    std::cout << "Không thể load font!\n";
+    std::cout << "Loi khoi tạo SDL_ttf\n";
     return -1;
 }
 
+    if (!font) {
+    std::cout << "Khong the load font!\n";
+    return -1;
+}
+*/TTF_Font* font = TTF_OpenFont("arial.ttf", 24);
     int choice=showMenu(ren);
     if (choice==EXIT){
         SDL_DestroyRenderer(ren);
@@ -60,8 +60,8 @@ int main(int argc,char* argv[]) {
         grid.resize(gridSize,std::vector<Pipe>(gridSize));
         genGrid();
        /**/
-        const int TIME_LIMIT=60000;
-        Uint32 startTime=SDL_GetTicks();
+     //   const int TIME_LIMIT=60000;
+       // Uint32 startTime=SDL_GetTicks();
       /**/
 
         for (int y=0;y<gridSize;y++) {
@@ -167,7 +167,7 @@ int main(int argc,char* argv[]) {
             SDL_Rect srcServer={0,0,40,40};
             SDL_Rect dstServer={serverPos.x*TS+OFFSET.x-20,serverPos.y*TS+OFFSET.y-20,40,40};
             SDL_RenderCopy(ren,server,&srcServer,&dstServer);
-            /**/
+            /*
             Uint32 currentTime=SDL_GetTicks();
             int timeLeft=(TIME_LIMIT-(currentTime-startTime))/1000;
             if (timeLeft<0)timeLeft=0;
@@ -183,7 +183,7 @@ int main(int argc,char* argv[]) {
                 SDL_Delay(1500);
                 running = false;}
 
-            /**/
+            */
             SDL_RenderPresent(ren);
             SDL_Delay(16);
         }

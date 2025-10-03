@@ -25,7 +25,7 @@
 	"graphic.h"
 	"defs.h"
 
-1744463784 source:c:\users\admin\onedrive\máy tính\pipe puzzle\main.cpp
+1759504979 source:c:\users\admin\onedrive\máy tính\pipe puzzle\main.cpp
 	<iostream>
 	<SDL.h>
 	<SDL_image.h>
@@ -34,6 +34,7 @@
 	<vector>
 	<cstdlib>
 	<ctime>
+	<string>
 	"graphic.h"
 	"defs.h"
 
@@ -41,10 +42,10 @@
 	<vector>
 	<SDL.h>
 
-1744416097 c:\users\admin\onedrive\máy tính\pipe puzzle\defs.h
+1759505966 c:\users\admin\onedrive\máy tính\pipe puzzle\defs.h
 	<SDL.h>
 
-1744448366 source:c:\users\admin\onedrive\máy tính\pipe puzzle\pipe.cpp
+1759508182 source:c:\users\admin\onedrive\máy tính\pipe puzzle\pipe.cpp
 	"graphic.h"
 	"defs.h"
 	<SDL_image.h>
