@@ -1,9 +1,0 @@
-# depslib dependency file v1.0
-1742573278 source:c:\users\admin\desktop\nextwa\main.cpp
-	<SDL.h>
-	<SDL_image.h>
-	<iostream>
-	<vector>
-	<cstdlib>
-	<ctime>
-

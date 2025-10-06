@@ -1,0 +1,72 @@
+# depslib dependency file v1.0
+1759773213 source:c:\users\admin\onedrive\máy tính\demo pipe puzzle\main\grid.cpp
+	"grid.h"
+	<cstdlib>
+
+1759773681 c:\users\admin\onedrive\máy tính\demo pipe puzzle\main\grid.h
+	"pipe.h"
+	"defs.h"
+
+1759773040 c:\users\admin\onedrive\máy tính\demo pipe puzzle\main\pipe.h
+	<vector>
+	<SDL.h>
+
+1759773681 c:\users\admin\onedrive\máy tính\demo pipe puzzle\main\defs.h
+	<SDL.h>
+	<vector>
+	"pipe.h"
+
+1759773213 source:c:\users\admin\onedrive\máy tính\demo pipe puzzle\main\main.cpp
+	<iostream>
+	<SDL.h>
+	<SDL_image.h>
+	<SDL_mixer.h>
+	<SDL_ttf.h>
+	<vector>
+	<cstdlib>
+	<ctime>
+	<string>
+	"pipe.h"
+	"grid.h"
+	"menu.h"
+	"defs.h"
+
+1759765067 c:\users\admin\onedrive\máy tính\demo pipe puzzle\main\game.h
+	<SDL.h>
+	<SDL_image.h>
+	<SDL_mixer.h>
+	<SDL_ttf.h>
+
+1759772686 source:c:\users\admin\onedrive\máy tính\demo pipe puzzle\main\pipe.cpp
+	"pipe.h"
+
+1759765508 source:c:\users\admin\onedrive\máy tính\demo pipe puzzle\main\render.cpp
+	"render.h"
+	<SDL_image.h>
+
+1759765067 c:\users\admin\onedrive\máy tính\demo pipe puzzle\main\render.h
+	<SDL.h>
+	"grid.h"
+	"defs.h"
+
+1759766839 source:c:\users\admin\onedrive\máy tính\demo pipe puzzle\main\game.cpp
+	"game.h"
+	"menu.h"
+	"grid.h"
+	"render.h"
+	"defs.h"
+	<iostream>
+	<vector>
+	<SDL_image.h>
+	<ctime>
+
+1759772686 c:\users\admin\onedrive\máy tính\demo pipe puzzle\main\menu.h
+	"defs.h"
+	<SDL.h>
+
+1759773681 source:c:\users\admin\onedrive\máy tính\demo pipe puzzle\main\menu.cpp
+	"menu.h"
+	<SDL_image.h>
+	<SDL_mixer.h>
+	<SDL.h>
+
