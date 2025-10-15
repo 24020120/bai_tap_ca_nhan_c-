@@ -32,6 +32,10 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="AuthManager.cpp" />
+		<Unit filename="AuthManager.h" />
+		<Unit filename="TextInputField.cpp" />
+		<Unit filename="TextInputField.h" />
 		<Unit filename="defs.h" />
 		<Unit filename="grid.cpp" />
 		<Unit filename="grid.h" />

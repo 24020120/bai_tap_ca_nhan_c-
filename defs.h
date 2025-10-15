@@ -4,6 +4,7 @@
 #include <vector>
 #include "pipe.h"
 
+class AuthManager;
 
 const int TS = 54;
 const SDL_Point OFFSET = {65, 55};
@@ -15,6 +16,8 @@ const int SETTINGS = 2;
 const int EXIT = 3;
 const int NONE = 4;
 const int REPLAY = 5;
+const int LOGIN = 6;
+const int REGISTER = 7;
 
 extern int gridSize;
 extern int winSize;
@@ -30,5 +33,8 @@ int showMenu(SDL_Renderer* ren);
 int showSettings(SDL_Renderer* ren, bool& mute);
 int showGuide(SDL_Renderer* ren);
 int showWin(SDL_Renderer* ren);
+int showShop(SDL_Renderer* ren);
+int showLogin(SDL_Renderer* ren, AuthManager& authManager);
+int showRegister(SDL_Renderer* ren, AuthManager& authManager);
 
 #endif

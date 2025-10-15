@@ -10,8 +10,8 @@
 #include "pipe.h"
 #include "grid.h"
 #include "menu.h"
-#include "defs.h"
-
+#include "AuthManager.h"
+#include "TextInputField.h"
 bool mute = false;
 int gridSize = 6;
 int winSize = gridSize * TS + 2 * OFFSET.x;
@@ -24,8 +24,7 @@ int main(int argc, char* argv[]) {
         std::cout << Mix_GetError() << std::endl;
         return 1;
     }
-    SDL_Window* win = SDL_CreateWindow("The Pipe Puzzle", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                       winSize, winSize, SDL_WINDOW_SHOWN);
+    SDL_Window* win = SDL_CreateWindow("The Pipe Puzzle", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,winSize, winSize, SDL_WINDOW_SHOWN);
     if (!win) return 1;
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!ren) {
@@ -47,16 +46,6 @@ int main(int argc, char* argv[]) {
     SDL_Texture* comp = IMG_LoadTexture(ren, "images/comp.png");
     SDL_Texture* serverTex = IMG_LoadTexture(ren, "images/server.png");
     SDL_Texture* pipeTex = IMG_LoadTexture(ren, "images/pipes.png");
-    if (!bg || !comp || !serverTex || !pipeTex) {
-        std::cout << "Error loading textures!" << std::endl;
-        SDL_DestroyTexture(bg); SDL_DestroyTexture(comp); SDL_DestroyTexture(serverTex); SDL_DestroyTexture(pipeTex);
-        SDL_DestroyRenderer(ren);
-        SDL_DestroyWindow(win);
-        Mix_CloseAudio();
-        SDL_Quit();
-        return 1;
-    }
-
     Mix_Music* music = Mix_LoadMUS("mix/music.mp3");
     Mix_Chunk* click = Mix_LoadWAV("mix/click.wav");
     if (music) {
@@ -64,14 +53,12 @@ int main(int argc, char* argv[]) {
         Mix_VolumeMusic(mute ? 0 : MIX_MAX_VOLUME);
     }
     SDL_Delay(2000);
-
     bool playing = true;
     while (playing) {
         winSize = gridSize * TS + 2 * OFFSET.x;
         SDL_SetWindowSize(win, winSize, winSize);
         grid.resize(gridSize, std::vector<Pipe>(gridSize));
         genGrid();
-
         for (int y = 0; y < gridSize; y++) {
             for (int x = 0; x < gridSize; x++) {
                 Pipe& p = getPipe(x, y);
@@ -92,14 +79,12 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-
         SDL_Point serverPos = {0, 0};
         do {
             serverPos.x = rand() % gridSize;
             serverPos.y = rand() % gridSize;
         } while (getPipe(serverPos.x, serverPos.y).dirs.size() == 1);
         flood(serverPos);
-
         bool running = true;
         bool win = false;
         while (running) {
@@ -118,7 +103,6 @@ int main(int argc, char* argv[]) {
                 win = true;
                 running = false;
             }
-
             SDL_Event e;
             while (SDL_PollEvent(&e)) {
                 if (e.type == SDL_QUIT) {
@@ -177,15 +161,12 @@ int main(int argc, char* argv[]) {
                     }
                 }
             }
-
             SDL_Rect srcServer = {0, 0, 40, 40};
             SDL_Rect dstServer = {serverPos.x * TS + OFFSET.x - 20, serverPos.y * TS + OFFSET.y - 20, 40, 40};
             SDL_RenderCopy(ren, serverTex, &srcServer, &dstServer);
-
             SDL_RenderPresent(ren);
             SDL_Delay(16);
         }
-
         if (win) {
             rounds++;
             if (rounds >= 3) {
@@ -209,11 +190,13 @@ int main(int argc, char* argv[]) {
     SDL_DestroyTexture(comp);
     SDL_DestroyTexture(serverTex);
     SDL_DestroyTexture(pipeTex);
-    if (music) Mix_FreeMusic(music);
-    if (click) Mix_FreeChunk(click);
+    if(music)Mix_FreeMusic(music);
+    if(click)Mix_FreeChunk(click);
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
     Mix_CloseAudio();
     SDL_Quit();
     return 0;
 }
+
+

@@ -5,25 +5,27 @@
 
 int showMenu(SDL_Renderer* ren) {
     SDL_Texture*bg=IMG_LoadTexture(ren,"images/background.png");
-    if (!bg) return EXIT;
     SDL_Texture*btnStart=IMG_LoadTexture(ren,"images/start.png");
     SDL_Texture*btnGuide=IMG_LoadTexture(ren,"images/guide.png");
     SDL_Texture*btnSet=IMG_LoadTexture(ren,"images/settings.png");
     SDL_Texture*btnExit=IMG_LoadTexture(ren,"images/exit.png");
-    if (!btnStart||!btnGuide||!btnSet||!btnExit) {
-        SDL_DestroyTexture(bg); SDL_DestroyTexture(btnStart); SDL_DestroyTexture(btnGuide); SDL_DestroyTexture(btnSet); SDL_DestroyTexture(btnExit);
-        return EXIT;
-    }
+    SDL_Texture*btnShop=IMG_LoadTexture(ren,"images/shop.png");
+
     const int BW=100;
     const int BH=100;
     const int GAP=50;
     const int cx=winSize/2;
     const int cy=winSize/2;
+    const int SMALL_BW=70;
+    const int SMALL_BH=70;
+    const int MARGIN=30;
+
     SDL_Rect rStart={cx-BW-GAP/2,cy-BH-GAP/2,BW,BH};
     SDL_Rect rGuide={cx-BW-GAP/2,cy+GAP/2,BW,BH};
     SDL_Rect rSet={cx+GAP/2,cy-BH-GAP/2,BW,BH};
     SDL_Rect rExit={cx+GAP/2,cy+GAP/2,BW,BH};
     SDL_Rect rBg={0,0,winSize,winSize};
+    SDL_Rect rShop={MARGIN,winSize-MARGIN-SMALL_BH,SMALL_BW,SMALL_BH};
     bool running=true;
     int choice=NONE;
     while(running) {
@@ -47,6 +49,8 @@ int showMenu(SDL_Renderer* ren) {
                 } else if (mx >= rExit.x&& mx<=rExit.x+rExit.w&&my >=rExit.y && my <= rExit.y + rExit.h) {
                     choice = EXIT;
                     running = false;
+                }  else if (mx >=rShop.x && mx<=rShop.x+rShop.w&&my >=rShop.y && my <= rShop.y + rShop.h) {
+                    showShop(ren);
                 }
             }
         }
@@ -54,7 +58,8 @@ int showMenu(SDL_Renderer* ren) {
         SDL_SetTextureColorMod(btnGuide,255,255,255);
         SDL_SetTextureColorMod(btnSet,255,255,255);
         SDL_SetTextureColorMod(btnExit,255,255,255);
-        if (mx>=rStart.x&&mx<=rStart.x+rStart.w&&my>=rStart.y&&my<=rStart.y+rStart.h) {
+        SDL_SetTextureColorMod(btnShop,255,255,255);
+        if (mx >= rStart.x && mx <= rStart.x + rStart.w && my >= rStart.y && my <= rStart.y + rStart.h) {
             SDL_SetTextureColorMod(btnStart,255,255,0);
         } else if (mx >= rGuide.x && mx <= rGuide.x + rGuide.w && my >= rGuide.y && my <= rGuide.y + rGuide.h) {
             SDL_SetTextureColorMod(btnGuide,255,255,0);
@@ -62,6 +67,8 @@ int showMenu(SDL_Renderer* ren) {
             SDL_SetTextureColorMod(btnSet, 255,255,0);
         } else if (mx >= rExit.x && mx <= rExit.x + rExit.w && my >= rExit.y && my <= rExit.y + rExit.h) {
             SDL_SetTextureColorMod(btnExit,255,255,0);
+        } else if (mx >=rShop.x && mx<=rShop.x+rShop.w&&my >=rShop.y && my <= rShop.y + rShop.h) {
+            SDL_SetTextureColorMod(btnShop,255,255,0);
         }
         SDL_RenderClear(ren);
         SDL_RenderCopy(ren,bg,nullptr,&rBg);
@@ -69,6 +76,7 @@ int showMenu(SDL_Renderer* ren) {
         SDL_RenderCopy(ren,btnGuide,nullptr,&rGuide);
         SDL_RenderCopy(ren,btnSet,nullptr,&rSet);
         SDL_RenderCopy(ren,btnExit,nullptr,&rExit);
+        SDL_RenderCopy(ren,btnShop,nullptr,&rShop);
         SDL_RenderPresent(ren);
     }
     SDL_DestroyTexture(bg);
@@ -76,6 +84,7 @@ int showMenu(SDL_Renderer* ren) {
     SDL_DestroyTexture(btnGuide);
     SDL_DestroyTexture(btnSet);
     SDL_DestroyTexture(btnExit);
+    SDL_DestroyTexture(btnShop);
     return choice;
 }
 
@@ -86,7 +95,10 @@ int showSettings(SDL_Renderer* ren, bool& mute) {
     SDL_Texture*btnUnmute=IMG_LoadTexture(ren,"images/unmute.png");
     SDL_Texture*btnBack=IMG_LoadTexture(ren,"images/back.png");
     if (!btnMute||!btnUnmute||!btnBack) {
-        SDL_DestroyTexture(bg);SDL_DestroyTexture(btnMute); SDL_DestroyTexture(btnUnmute); SDL_DestroyTexture(btnBack);
+        SDL_DestroyTexture(bg);
+        SDL_DestroyTexture(btnMute);
+        SDL_DestroyTexture(btnUnmute);
+        SDL_DestroyTexture(btnBack);
         return EXIT;
     }
     const int BW=70;
@@ -195,7 +207,10 @@ int showWin(SDL_Renderer* ren) {
     SDL_Texture* btnExit = IMG_LoadTexture(ren, "images/exit.png");
     SDL_Texture* winTex = IMG_LoadTexture(ren, "images/TimeUp.png");
     if (!btnReplay || !btnExit || !winTex) {
-        SDL_DestroyTexture(bg); SDL_DestroyTexture(btnReplay); SDL_DestroyTexture(btnExit); SDL_DestroyTexture(winTex);
+         SDL_DestroyTexture(bg);
+         SDL_DestroyTexture(btnReplay);
+         SDL_DestroyTexture(btnExit);
+         SDL_DestroyTexture(winTex);
         return EXIT;
     }
 
@@ -250,3 +265,49 @@ int showWin(SDL_Renderer* ren) {
     SDL_DestroyTexture(winTex);
     return choice;
 }
+
+int showShop(SDL_Renderer* ren) {
+    SDL_Texture* bg=IMG_LoadTexture(ren,"images/background.png");
+    SDL_Texture* btnBack=IMG_LoadTexture(ren,"images/back.png");
+   // TTF_Font* font = TTF_OpenFont("font/arial.ttf", 40);
+    const int BW=70;
+    const int BH=50;
+    const int cx=winSize/2;
+    const int cy=winSize/2;
+    SDL_Rect rBack={cx-BW/2,cy+150,BW,BH};
+    SDL_Rect rBg={0,0,winSize,winSize};
+    bool running=true;
+    int choice=NONE;
+    while (running) {
+        SDL_Event e;
+        int mx,my;
+        SDL_GetMouseState(&mx,&my);
+        while (SDL_PollEvent(&e)) {
+            if (e.type==SDL_QUIT) {
+                choice=EXIT;
+                running=false;
+            } else if (e.type==SDL_MOUSEBUTTONDOWN&&e.button.button==SDL_BUTTON_LEFT) {
+                mx=e.button.x;
+                my=e.button.y;
+                if (mx >= rBack.x && mx <= rBack.x + rBack.w && my >= rBack.y && my <= rBack.y + rBack.h) {
+                    choice=NONE;
+                    running=false;
+                }
+            }
+        }
+        SDL_SetTextureColorMod(btnBack,255,255,255);
+        if (mx >= rBack.x && mx <= rBack.x +rBack.w && my >= rBack.y && my <= rBack.y + rBack.h) {
+            SDL_SetTextureColorMod(btnBack,255,255,0);
+        }
+        SDL_RenderClear(ren);
+        SDL_RenderCopy(ren,bg,nullptr,&rBg);
+        SDL_RenderCopy(ren,btnBack,nullptr,&rBack);
+        SDL_RenderPresent(ren);
+    }
+    SDL_DestroyTexture(bg);
+    SDL_DestroyTexture(btnBack);
+    return choice;
+}
+
+
+
