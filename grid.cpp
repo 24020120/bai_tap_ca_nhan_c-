@@ -1,6 +1,6 @@
 #include "grid.h"
 #include <cstdlib>
-
+#include "defs.h"
 Pipe& getPipe(int x, int y) {
     return grid[y][x];
 }
@@ -10,6 +10,8 @@ bool out(const SDL_Point& pos) {
 }
 
 void genGrid() {
+    grid.clear();
+    grid.resize(gridSize, std::vector<Pipe>(gridSize));
     std::vector<SDL_Point> nodes;
     SDL_Point start = {static_cast<int>(rand()) % gridSize, static_cast<int>(rand()) % gridSize};
     nodes.push_back(start);
@@ -49,6 +51,7 @@ void genGrid() {
 
 void flood(const SDL_Point& pos) {
     Pipe& p = getPipe(pos.x, pos.y);
+    if(p.on||p.isBroken) return;
     if (p.on) return;
     p.on = true;
     for (const auto& d : DIR) {

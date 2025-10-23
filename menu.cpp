@@ -308,6 +308,15 @@ int showShop(SDL_Renderer* ren) {
     SDL_DestroyTexture(btnBack);
     return choice;
 }
+/*
+int shownext(SDL_Renderer* rea) {
+    SDL_Texture* bg=IMG_LoadTexture("images/backgroundNext.png");
+    SDL_Texture* btnback=IMG_LoadTexture("images/back.png");
+    SDL_Texture* btnext=IMG_LoadTexture("images/next")
+
+}*/
+
+
 
 
 

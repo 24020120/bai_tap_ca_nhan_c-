@@ -46,6 +46,9 @@ int main(int argc, char* argv[]) {
     SDL_Texture* comp = IMG_LoadTexture(ren, "images/comp.png");
     SDL_Texture* serverTex = IMG_LoadTexture(ren, "images/server.png");
     SDL_Texture* pipeTex = IMG_LoadTexture(ren, "images/pipes.png");
+    SDL_Texture* glassPipeTex = IMG_LoadTexture(ren, "images/glass_pipes.png");
+    SDL_Texture* cracksTex = IMG_LoadTexture(ren, "images/cracks.png");
+    SDL_Texture* brokenPipeTex = IMG_LoadTexture(ren, "images/broken_pipe.png");
     Mix_Music* music = Mix_LoadMUS("mix/music.mp3");
     Mix_Chunk* click = Mix_LoadWAV("mix/click.wav");
     if (music) {
@@ -84,6 +87,26 @@ int main(int argc, char* argv[]) {
             serverPos.x = rand() % gridSize;
             serverPos.y = rand() % gridSize;
         } while (getPipe(serverPos.x, serverPos.y).dirs.size() == 1);
+
+        if(rounds>1) {
+            int glassPipesToMake=std::min(rounds,(gridSize * gridSize)/4);
+            int pipesMade = 0;
+            while (pipesMade < glassPipesToMake) {
+                int rx=rand()%gridSize;
+                int ry=rand()%gridSize;
+                if ((rx==serverPos.x&&ry==serverPos.y)||getPipe(rx,ry).dirs.empty()) {
+                    continue;
+                }
+                Pipe& p = getPipe(rx, ry);
+                if (p.pipeType==STEEL) {
+                    p.pipeType=GLASS;
+                    p.rotationCount=0;
+                    p.isBroken=false;
+                    pipesMade++;
+                }
+            }
+        }
+
         flood(serverPos);
         bool running = true;
         bool win = false;
@@ -135,6 +158,11 @@ int main(int argc, char* argv[]) {
             for (int y = 0; y < gridSize; y++) {
                 for (int x = 0; x < gridSize; x++) {
                     Pipe& p = grid[y][x];
+
+                    if (p.isBroken) {
+                        SDL_Rect dst = {x * TS + OFFSET.x - 27, y * TS + OFFSET.y - 27, TS, TS};
+                        if (brokenPipeTex) SDL_RenderCopy(ren, brokenPipeTex, nullptr, &dst);
+                    }
                     int type = static_cast<int>(p.dirs.size());
                     if (type == 2 && p.dirs[0].x == -p.dirs[1].x && p.dirs[0].y == -p.dirs[1].y) {
                         type = 0;
@@ -150,9 +178,22 @@ int main(int argc, char* argv[]) {
                     p.angle += deltaAngle;
                     while (p.angle >= 360.0f) p.angle -= 360.0f;
                     while (p.angle < 0.0f) p.angle += 360.0f;
+
                     SDL_Rect src = {type * TS, 0, TS, TS};
                     SDL_Rect dst = {x * TS + OFFSET.x - 27, y * TS + OFFSET.y - 27, TS, TS};
                     SDL_Point center = {27, 27};
+
+                    SDL_Texture* texToUse = (p.pipeType == GLASS) ? glassPipeTex : pipeTex;
+                        if (texToUse) {
+                            SDL_RenderCopyEx(ren, texToUse, &src, &dst, p.angle, &center, SDL_FLIP_NONE);
+                        }
+                        if (p.pipeType==GLASS&&p.rotationCount>0&& p.rotationCount<=3) {
+                            SDL_Rect srcCrack={(p.rotationCount-1)*TS,0,TS,TS};
+                            if (cracksTex) {
+                                SDL_RenderCopyEx(ren, cracksTex, &srcCrack, &dst, p.angle, &center, SDL_FLIP_NONE);
+                            }
+                        }
+
                     SDL_RenderCopyEx(ren, pipeTex, &src, &dst, p.angle, &center, SDL_FLIP_NONE);
                     if (p.dirs.size() == 1) {
                         SDL_Rect srcComp = {p.on ? 53 : 0, 0, 36, 36};

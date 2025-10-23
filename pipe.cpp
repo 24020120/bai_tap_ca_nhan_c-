@@ -1,6 +1,15 @@
 #include "pipe.h"
 
 void Pipe::rotate() {
+    if (isBroken) return;
+    if (pipeType==GLASS) {
+        rotationCount++;
+        if (rotationCount>3) {
+            isBroken=true;
+           // dirs.clear();
+            return;
+        }
+    }
     for (auto& d : dirs) {
         if (d.x == 0 && d.y == -1) {
             d.x = 1; d.y = 0;
