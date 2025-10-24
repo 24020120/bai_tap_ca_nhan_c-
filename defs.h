@@ -34,7 +34,6 @@ int showSettings(SDL_Renderer* ren, bool& mute);
 int showGuide(SDL_Renderer* ren);
 int showWin(SDL_Renderer* ren);
 int showShop(SDL_Renderer* ren);
-int showLogin(SDL_Renderer* ren, AuthManager& authManager);
-int showRegister(SDL_Renderer* ren, AuthManager& authManager);
+int showLogin(SDL_Renderer* ren);
 
 #endif

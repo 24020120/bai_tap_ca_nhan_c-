@@ -10,8 +10,8 @@
 #include "pipe.h"
 #include "grid.h"
 #include "menu.h"
-#include "AuthManager.h"
-#include "TextInputField.h"
+//#include "AuthManager.h"
+//#include "TextInputField.h"
 bool mute = false;
 int gridSize = 6;
 int winSize = gridSize * TS + 2 * OFFSET.x;

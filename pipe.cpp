@@ -6,7 +6,7 @@ void Pipe::rotate() {
         rotationCount++;
         if (rotationCount>3) {
             isBroken=true;
-           // dirs.clear();
+            dirs.clear();
             return;
         }
     }
