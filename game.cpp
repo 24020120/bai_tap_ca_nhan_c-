@@ -1,121 +1,192 @@
 #include "game.h"
-#include "menu.h"
-#include "grid.h"
-#include "render.h"
-#include "defs.h"
-#include <iostream>
-#include <vector>
-#include <SDL_image.h>
+#include <string>
+#include <algorithm>
+#include <cstdlib>
 #include <ctime>
 
-bool mute = false;
-int winSize = gridSize * TS + 2 * OFFSET.x;
-int rounds = 1;
+extern int rounds;
+extern std::vector<std::vector<Pipe>> grid;
+extern bool mute;
 
-SDL_Window* win = nullptr;
-SDL_Renderer* ren = nullptr;
-TTF_Font* font = nullptr;
-Mix_Music* music = nullptr;
-
-SDL_Texture* pipeTex = nullptr;
-SDL_Texture* comp = nullptr;
-SDL_Texture* server = nullptr;
-SDL_Texture* bg = nullptr;
-
-bool initGame() {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
-        std::cout << "SDL_Init failed: " << SDL_GetError() << "\n";
-        return false;
-    }
-    if (TTF_Init() == -1) {
-        std::cout << "TTF_Init failed\n";
-        return false;
-    }
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-        std::cout << "Mix_OpenAudio failed\n";
-        return false;
-    }
-
-    win = SDL_CreateWindow("The Pipe Puzzle", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, winSize, winSize, SDL_WINDOW_SHOWN);
-    if (!win) return false;
-    ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!ren) return false;
-    font = TTF_OpenFont("assets/arial.ttf", 24);
-    if (!font) {
-        std::cout << "Font failed, using system\n";
-    }
-
-    pipeTex = IMG_LoadTexture(ren, "assets/pipes.png");
-    comp = IMG_LoadTexture(ren, "assets/comp.png");
-    server = IMG_LoadTexture(ren, "assets/server.png");
-    bg = IMG_LoadTexture(ren, "assets/background.png");
-    music = Mix_LoadMUS("assets/music.mp3");
+void playGame(SDL_Window* win, SDL_Renderer* ren,
+              SDL_Texture* bg, SDL_Texture* comp, SDL_Texture* serverTex,
+              SDL_Texture* pipeTex, SDL_Texture* glassPipeTex, SDL_Texture* cracksTex,
+              SDL_Texture* brokenPipeTex, Mix_Music* music, Mix_Chunk* click) {
     if (music) {
-        if (!mute) Mix_PlayMusic(music, -1);
-        else Mix_VolumeMusic(0);
+        Mix_PlayMusic(music, -1);
+        Mix_VolumeMusic(mute ? 0 : MIX_MAX_VOLUME);
     }
+    SDL_Delay(2000);
 
-    return true;
-}
-
-void runGame() {
-    bool quit = false;
-    while (!quit) {
-        int choice = showMenu(ren, font);
-
-        if (choice == EXIT) quit = true;
-        else if (choice == GUIDE)
-            showGuide(ren, font);
-        else if (choice == SETTINGS) {
-            showSettings(ren, mute);
-            if (music) {
-                Mix_VolumeMusic(mute ? 0 : MIX_MAX_VOLUME);
-                if (!mute) Mix_PlayMusic(music, -1);
+    bool playing = true;
+    while (playing) {
+        int winSize = gridSize * TS + 2 * OFFSET.x;
+        SDL_SetWindowSize(win, winSize, winSize);
+        grid.resize(gridSize, std::vector<Pipe>(gridSize));
+        genGrid();
+        for (int y = 0; y < gridSize; y++) {
+            for (int x = 0; x < gridSize; x++) {
+                Pipe& p = getPipe(x, y);
+                for (int n = 4; n > 0; n--) {
+                    std::string dirStr;
+                    for (auto& d : DIR) {
+                        dirStr += (p.hasDir(d) ? '1' : '0');
+                    }
+                    if (dirStr == "0011" || dirStr == "0111" || dirStr == "0101" || dirStr == "0010") {
+                        p.dir = n;
+                    }
+                    p.rotate();
+                }
+                int randRot = rand() % 4;
+                for (int r = 0; r < randRot; r++) {
+                    p.dir++;
+                    p.rotate();
+                }
             }
-        } else {  // NEWGAME
-            genGrid();
-            SDL_Point serverPos = {0, 0};
-            grid[0][0].on = true;
+        }
+        SDL_Point serverPos = {0, 0};
+        do {
+            serverPos.x = rand() % gridSize;
+            serverPos.y = rand() % gridSize;
+        } while (getPipe(serverPos.x, serverPos.y).dirs.size() == 1);
 
-            bool running = true;
-            while (running) {
-                SDL_Event e;
-                while (SDL_PollEvent(&e)) {
-                    if (e.type == SDL_QUIT) {
-                        running = false;
-                        quit = true;
-                    } else if (e.type == SDL_MOUSEBUTTONDOWN) {
-                        int x = (e.button.x - OFFSET.x) / TS;
-                        int y = (e.button.y - OFFSET.y) / TS;
-                        if (x >= 0 && x < gridSize && y >= 0 && y < gridSize && !(x == 0 && y == 0)) {
-                            grid[y][x].rotate();
-                            flood(serverPos);
-                        }
+        if (rounds > 1) {
+            int glassPipesToMake = std::min(rounds, (gridSize * gridSize) / 4);
+            int pipesMade = 0;
+            while (pipesMade < glassPipesToMake) {
+                int rx = rand() % gridSize;
+                int ry = rand() % gridSize;
+                if ((rx == serverPos.x && ry == serverPos.y) || getPipe(rx, ry).dirs.empty()) {
+                    continue;
+                }
+                Pipe& p = getPipe(rx, ry);
+                if (p.pipeType == STEEL) {
+                    p.pipeType = GLASS;
+                    p.rotationCount = 0;
+                    p.isBroken = false;
+                    pipesMade++;
+                }
+            }
+        }
+
+        flood(serverPos);
+        bool running = true;
+        bool win = false;
+        while (running) {
+            bool allConnected = true;
+            for (int y = 0; y < gridSize; y++) {
+                for (int x = 0; x < gridSize; x++) {
+                    if (grid[y][x].dirs.size() > 0 && !grid[y][x].on) {
+                        allConnected = false;
+                        goto next_y;
                     }
                 }
+                next_y:;
+                if (!allConnected) break;
+            }
+            if (allConnected) {
+                win = true;
+                running = false;
+            }
 
-                renderGrid(ren, pipeTex, comp, server, bg, serverPos);
-
-                if (isWin()) {
-                    showWin(ren, font);  // Sửa: Pass font
+            SDL_Event e;
+            while (SDL_PollEvent(&e)) {
+                if (e.type == SDL_QUIT) {
                     running = false;
+                    playing = false;
+                } else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+                    int mx = e.button.x + TS / 2 - OFFSET.x;
+                    int my = e.button.y + TS / 2 - OFFSET.y;
+                    int gx = mx / TS;
+                    int gy = my / TS;
+                    SDL_Point pos = {gx, gy};
+                    if (!out(pos)) {
+                        if (click) Mix_PlayChannel(-1, click, 0);
+                        Pipe& p = getPipe(gx, gy);
+                        p.dir++;
+                        p.rotate();
+                        // Reset on
+                        for (int yy = 0; yy < gridSize; yy++) {
+                            for (int xx = 0; xx < gridSize; xx++) {
+                                grid[yy][xx].on = false;
+                            }
+                        }
+                        flood(serverPos);
+                    }
                 }
-                SDL_Delay(16);
+            }
+
+            SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
+            SDL_RenderClear(ren);
+            SDL_Rect rBg = {0, 0, winSize, winSize};
+            SDL_RenderCopy(ren, bg, nullptr, &rBg);
+            for (int y = 0; y < gridSize; y++) {
+                for (int x = 0; x < gridSize; x++) {
+                    Pipe& p = grid[y][x];
+                    if (p.isBroken) {
+                        SDL_Rect dst = {x * TS + OFFSET.x - 27, y * TS + OFFSET.y - 27, TS, TS};
+                        if (brokenPipeTex) SDL_RenderCopy(ren, brokenPipeTex, nullptr, &dst);
+                    }
+                    int type = static_cast<int>(p.dirs.size());
+                    if (type == 2 && p.dirs[0].x == -p.dirs[1].x && p.dirs[0].y == -p.dirs[1].y) {
+                        type = 0;
+                    }
+                    float targetAngle = (p.dir % 4) * 90.0f;
+                    float deltaAngle = targetAngle - p.angle;
+                    while (deltaAngle > 180.0f) deltaAngle -= 360.0f;
+                    while (deltaAngle < -180.0f) deltaAngle += 360.0f;
+                    const float rotationSpeed = 360.0f;
+                    float maxDelta = rotationSpeed * (16.0f / 1000.0f);
+                    if (deltaAngle > maxDelta) deltaAngle = maxDelta;
+                    if (deltaAngle < -maxDelta) deltaAngle = -maxDelta;
+                    p.angle += deltaAngle;
+                    while (p.angle >= 360.0f) p.angle -= 360.0f;
+                    while (p.angle < 0.0f) p.angle += 360.0f;
+
+                    SDL_Rect src = {type * TS, 0, TS, TS};
+                    SDL_Rect dst = {x * TS + OFFSET.x - 27, y * TS + OFFSET.y - 27, TS, TS};
+                    SDL_Point center = {27, 27};
+
+                    SDL_Texture* texToUse = (p.pipeType == GLASS) ? glassPipeTex : pipeTex;
+                    if (texToUse) {
+                        SDL_RenderCopyEx(ren, texToUse, &src, &dst, p.angle, &center, SDL_FLIP_NONE);
+                    }
+                    if (p.pipeType == GLASS && p.rotationCount > 0 && p.rotationCount <= 3) {
+                        SDL_Rect srcCrack = {(p.rotationCount - 1) * TS, 0, TS, TS};
+                        if (cracksTex) {
+                            SDL_RenderCopyEx(ren, cracksTex, &srcCrack, &dst, p.angle, &center, SDL_FLIP_NONE);
+                        }
+                    }
+                    if (p.dirs.size() == 1) {
+                        SDL_Rect srcComp = {p.on ? 53 : 0, 0, 36, 36};
+                        SDL_Rect dstComp = {x * TS + OFFSET.x - 18, y * TS + OFFSET.y - 18, 36, 36};
+                        SDL_RenderCopy(ren, comp, &srcComp, &dstComp);
+                    }
+                }
+            }
+            SDL_Rect srcServer = {0, 0, 40, 40};
+            SDL_Rect dstServer = {serverPos.x * TS + OFFSET.x - 20, serverPos.y * TS + OFFSET.y - 20, 40, 40};
+            SDL_RenderCopy(ren, serverTex, &srcServer, &dstServer);
+            SDL_RenderPresent(ren);
+            SDL_Delay(16);
+        }
+        if (win) {
+            rounds++;
+            if (rounds >= 3) {
+                int result = showWin(ren);
+                if (result == REPLAY) {
+                    gridSize = 6;
+                    rounds = 1;
+                    grid.clear();
+                    grid.resize(gridSize, std::vector<Pipe>(gridSize));
+                } else if (result == EXIT) {
+                    playing = false;
+                }
+            } else {
+                gridSize++;
+                grid.clear();
+                grid.resize(gridSize, std::vector<Pipe>(gridSize));
             }
         }
     }
-}
-
-void cleanUp() {
-    if (music) Mix_FreeMusic(music);
-    if (pipeTex) SDL_DestroyTexture(pipeTex);
-    if (comp) SDL_DestroyTexture(comp);
-    if (server) SDL_DestroyTexture(server);
-    if (bg) SDL_DestroyTexture(bg);
-    if (font) TTF_CloseFont(font);
-    if (ren) SDL_DestroyRenderer(ren);
-    if (win) SDL_DestroyWindow(win);
-    Mix_CloseAudio();
-    TTF_Quit();
-    SDL_Quit();
 }

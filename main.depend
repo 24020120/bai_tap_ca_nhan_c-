@@ -88,7 +88,7 @@
 	<vector>
 	"pipe.h"
 
-1761205080 source:c:\users\admin\onedrive\máy tính\pipe puzzle\main.cpp
+1761281749 source:c:\users\admin\onedrive\máy tính\pipe puzzle\main.cpp
 	<iostream>
 	<SDL.h>
 	<SDL_image.h>
@@ -101,12 +101,13 @@
 	"pipe.h"
 	"grid.h"
 	"menu.h"
+	"game.h"
 
 1761273110 c:\users\admin\onedrive\máy tính\pipe puzzle\menu.h
 	"defs.h"
 	<SDL.h>
 
-1761272555 source:c:\users\admin\onedrive\máy tính\pipe puzzle\menu.cpp
+1761281231 source:c:\users\admin\onedrive\máy tính\pipe puzzle\menu.cpp
 	"menu.h"
 	<SDL_image.h>
 	<SDL_mixer.h>
@@ -556,4 +557,18 @@
 	"TextInputField.h"
 	<iostream>
 	<SDL_ttf.h>
+
+1761281726 c:\users\admin\onedrive\máy tính\pipe puzzle\game.h
+	<SDL.h>
+	<SDL_image.h>
+	<SDL_mixer.h>
+	"grid.h"
+	"defs.h"
+
+1761281726 source:c:\users\admin\onedrive\máy tính\pipe puzzle\game.cpp
+	"game.h"
+	<string>
+	<algorithm>
+	<cstdlib>
+	<ctime>
 

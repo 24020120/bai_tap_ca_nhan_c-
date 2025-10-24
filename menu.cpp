@@ -352,6 +352,7 @@ int showShop(SDL_Renderer* ren) {
                 my = e.button.y;
                 if (mx >= rBack.x && mx <= rBack.x + rBack.w && my >= rBack.y && my <= rBack.y + rBack.h) {
                     choice = NONE;
+                    running = false;
                 } else if (mx >= rNext.x && mx <= rNext.x + rNext.w && my >= rNext.y && my <= rNext.y + rNext.h) {
 
                     choice = LOGIN;
