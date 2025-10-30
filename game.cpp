@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <SDL_ttf.h>
 
 extern int rounds;
 extern std::vector<std::vector<Pipe>> grid;
@@ -19,6 +20,11 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
     SDL_Delay(2000);
 
     bool playing = true;
+
+    TTF_Init();
+    TTF_Font* font = TTF_OpenFont("assets/arial.ttf", 32); // Đảm bảo có file arial.ttf trong thư mục assets
+    SDL_Color white = {255, 255, 255, 255};
+
     while (playing) {
         int winSize = gridSize * TS + 2 * OFFSET.x;
         SDL_SetWindowSize(win, winSize, winSize);
@@ -72,6 +78,8 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
         flood(serverPos);
         bool running = true;
         bool win = false;
+        const int MAX_TIME = 60;  // thời gian giới hạn mỗi màn (giây)
+        Uint32 startTime = SDL_GetTicks();
         while (running) {
             bool allConnected = true;
             for (int y = 0; y < gridSize; y++) {
@@ -105,7 +113,6 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                         Pipe& p = getPipe(gx, gy);
                         p.dir++;
                         p.rotate();
-                        // Reset on
                         for (int yy = 0; yy < gridSize; yy++) {
                             for (int xx = 0; xx < gridSize; xx++) {
                                 grid[yy][xx].on = false;
@@ -116,10 +123,23 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                 }
             }
 
+            Uint32 currentTime = SDL_GetTicks();
+            int elapsedSeconds = (currentTime - startTime) / 1000;
+            int remainingTime = MAX_TIME - elapsedSeconds;
+            if (remainingTime <= 0) {
+                running = false;
+                win = false;
+            }
+
+            // Clear màn hình trước
             SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
             SDL_RenderClear(ren);
+
+            // Render background
             SDL_Rect rBg = {0, 0, winSize, winSize};
             SDL_RenderCopy(ren, bg, nullptr, &rBg);
+
+            // Render pipes, server, v.v.
             for (int y = 0; y < gridSize; y++) {
                 for (int x = 0; x < gridSize; x++) {
                     Pipe& p = grid[y][x];
@@ -167,9 +187,27 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
             SDL_Rect srcServer = {0, 0, 40, 40};
             SDL_Rect dstServer = {serverPos.x * TS + OFFSET.x - 20, serverPos.y * TS + OFFSET.y - 20, 40, 40};
             SDL_RenderCopy(ren, serverTex, &srcServer, &dstServer);
+
+            // Render text thời gian SAU khi clear và render các thứ khác (fix chính ở đây)
+            if (remainingTime > 0 || win) {  // Chỉ render nếu chưa hết giờ hoặc đã win (tránh flicker khi fail)
+                std::string timeText = "Time: " + std::to_string(std::max(0, remainingTime));
+                SDL_Surface* timeSurface = TTF_RenderText_Solid(font, timeText.c_str(), white);
+                if (timeSurface) {
+                    SDL_Texture* timeTexture = SDL_CreateTextureFromSurface(ren, timeSurface);
+                    if (timeTexture) {
+                        SDL_Rect timeRect = {20, 20, timeSurface->w, timeSurface->h};
+                        SDL_RenderCopy(ren, timeTexture, nullptr, &timeRect);
+                        SDL_DestroyTexture(timeTexture);
+                    }
+                    SDL_FreeSurface(timeSurface);
+                }
+            }
+
+            // Present màn hình
             SDL_RenderPresent(ren);
             SDL_Delay(16);
         }
+
         if (win) {
             rounds++;
             if (rounds >= 3) {
@@ -189,4 +227,7 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
             }
         }
     }
+
+    if (font) TTF_CloseFont(font);
+    TTF_Quit();
 }
