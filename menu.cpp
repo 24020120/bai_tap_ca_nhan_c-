@@ -2,7 +2,9 @@
 #include <SDL_image.h>
 #include <SDL_mixer.h>
 #include <SDL.h>
-
+#include <SDL_ttf.h>
+#include <string>
+#include <iostream>
 int showMenu(SDL_Renderer* ren) {
     SDL_Texture*bg=IMG_LoadTexture(ren,"images/background.png");
     SDL_Texture*btnStart=IMG_LoadTexture(ren,"images/start.png");
@@ -211,6 +213,10 @@ int showGuide(SDL_Renderer* ren) {
 }
 
 int showWin(SDL_Renderer* ren) {
+    TTF_Init();
+    TTF_Font* font = TTF_OpenFont("assets/arial.ttf", 48);
+    SDL_Color white = {255, 255, 255, 255};
+    SDL_Color green = {100, 255, 100, 255};
     SDL_Texture* bg = IMG_LoadTexture(ren, "images/background.png");
     if (!bg) return EXIT;
     SDL_Texture* btnReplay = IMG_LoadTexture(ren, "images/replay.png");
@@ -222,6 +228,18 @@ int showWin(SDL_Renderer* ren) {
          SDL_DestroyTexture(btnExit);
          SDL_DestroyTexture(winTex);
         return EXIT;
+    }
+
+    extern int score;
+    std::string finalScoreText = "Final Score: " + std::to_string(score);
+    SDL_Surface* scoreSurface = TTF_RenderText_Solid(font, finalScoreText.c_str(), white);
+    SDL_Texture* scoreTexture = nullptr;
+    SDL_Rect scoreRect = {winSize / 2 - 100, winSize / 2 - 50, 0, 0};  // Sẽ update width/height sau
+    if (scoreSurface) {
+        scoreTexture = SDL_CreateTextureFromSurface(ren, scoreSurface);
+        scoreRect.w = scoreSurface->w;
+        scoreRect.h = scoreSurface->h;
+        SDL_FreeSurface(scoreSurface);
     }
 
     const int BW = 70;

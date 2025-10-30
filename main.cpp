@@ -16,6 +16,7 @@ bool mute = false;
 int gridSize = 6;
 int winSize = gridSize * TS + 2 * OFFSET.x;
 int rounds = 1;
+int score = 0;
 std::vector<std::vector<Pipe>> grid;
 
 int main(int argc, char* argv[]) {

@@ -19,6 +19,7 @@ const int REPLAY = 5;
 const int LOGIN = 6;
 const int REGISTER = 7;
 
+extern int score;
 extern int gridSize;
 extern int winSize;
 extern bool mute;

@@ -8,7 +8,7 @@
 extern int rounds;
 extern std::vector<std::vector<Pipe>> grid;
 extern bool mute;
-
+extern int score;
 void playGame(SDL_Window* win, SDL_Renderer* ren,
               SDL_Texture* bg, SDL_Texture* comp, SDL_Texture* serverTex,
               SDL_Texture* pipeTex, SDL_Texture* glassPipeTex, SDL_Texture* cracksTex,
@@ -22,7 +22,7 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
     bool playing = true;
 
     TTF_Init();
-    TTF_Font* font = TTF_OpenFont("assets/arial.ttf", 32); // Đảm bảo có file arial.ttf trong thư mục assets
+    TTF_Font* font = TTF_OpenFont("assets/arial.ttf", 32);
     SDL_Color white = {255, 255, 255, 255};
 
     while (playing) {
@@ -78,7 +78,7 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
         flood(serverPos);
         bool running = true;
         bool win = false;
-        const int MAX_TIME = 60;  // thời gian giới hạn mỗi màn (giây)
+        const int MAX_TIME = 60;
         Uint32 startTime = SDL_GetTicks();
         while (running) {
             bool allConnected = true;
@@ -129,17 +129,23 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
             if (remainingTime <= 0) {
                 running = false;
                 win = false;
+                 int result = showWin(ren);
+                if (result == REPLAY) {
+                    gridSize = 6;
+                    rounds = 1;
+                    grid.clear();
+                    grid.resize(gridSize, std::vector<Pipe>(gridSize));
+                } else if (result == EXIT) {
+                    playing = false;
+                }
             }
 
-            // Clear màn hình trước
             SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
             SDL_RenderClear(ren);
 
-            // Render background
             SDL_Rect rBg = {0, 0, winSize, winSize};
             SDL_RenderCopy(ren, bg, nullptr, &rBg);
 
-            // Render pipes, server, v.v.
             for (int y = 0; y < gridSize; y++) {
                 for (int x = 0; x < gridSize; x++) {
                     Pipe& p = grid[y][x];
@@ -188,8 +194,7 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
             SDL_Rect dstServer = {serverPos.x * TS + OFFSET.x - 20, serverPos.y * TS + OFFSET.y - 20, 40, 40};
             SDL_RenderCopy(ren, serverTex, &srcServer, &dstServer);
 
-            // Render text thời gian SAU khi clear và render các thứ khác (fix chính ở đây)
-            if (remainingTime > 0 || win) {  // Chỉ render nếu chưa hết giờ hoặc đã win (tránh flicker khi fail)
+            if (remainingTime > 0 || win) {
                 std::string timeText = "Time: " + std::to_string(std::max(0, remainingTime));
                 SDL_Surface* timeSurface = TTF_RenderText_Solid(font, timeText.c_str(), white);
                 if (timeSurface) {
@@ -202,15 +207,26 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                     SDL_FreeSurface(timeSurface);
                 }
             }
-
-            // Present màn hình
+            std::string scoreText = "Score: " + std::to_string(score);
+            SDL_Surface* scoreSurface = TTF_RenderText_Solid(font, scoreText.c_str(), white);
+            if (scoreSurface) {
+                SDL_Texture* scoreTexture = SDL_CreateTextureFromSurface(ren, scoreSurface);
+                if (scoreTexture) {
+                    SDL_Rect scoreRect = {winSize - 150, 20, scoreSurface->w, scoreSurface->h};
+                    SDL_RenderCopy(ren, scoreTexture, nullptr, &scoreRect);
+                    SDL_DestroyTexture(scoreTexture);
+                }
+                SDL_FreeSurface(scoreSurface);
+            }
             SDL_RenderPresent(ren);
             SDL_Delay(16);
         }
 
         if (win) {
             rounds++;
+            score+=50;
             if (rounds >= 3) {
+
                 int result = showWin(ren);
                 if (result == REPLAY) {
                     gridSize = 6;

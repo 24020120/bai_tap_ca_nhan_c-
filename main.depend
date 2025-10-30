@@ -83,12 +83,12 @@
 	<vector>
 	<SDL.h>
 
-1761808539 c:\users\admin\onedrive\máy tính\pipe puzzle\defs.h
+1761816957 c:\users\admin\onedrive\máy tính\pipe puzzle\defs.h
 	<SDL.h>
 	<vector>
 	"pipe.h"
 
-1761808539 source:c:\users\admin\onedrive\máy tính\pipe puzzle\main.cpp
+1761816957 source:c:\users\admin\onedrive\máy tính\pipe puzzle\main.cpp
 	<iostream>
 	<SDL.h>
 	<SDL_image.h>
@@ -107,11 +107,14 @@
 	"defs.h"
 	<SDL.h>
 
-1761366502 source:c:\users\admin\onedrive\máy tính\pipe puzzle\menu.cpp
+1761817380 source:c:\users\admin\onedrive\máy tính\pipe puzzle\menu.cpp
 	"menu.h"
 	<SDL_image.h>
 	<SDL_mixer.h>
 	<SDL.h>
+	<SDL_ttf.h>
+	<string>
+	<iostream>
 
 1761807539 source:c:\users\admin\onedrive\máy tính\pipe puzzle\pipe.cpp
 	"pipe.h"
@@ -565,7 +568,7 @@
 	"grid.h"
 	"defs.h"
 
-1761814399 source:c:\users\admin\onedrive\máy tính\pipe puzzle\game.cpp
+1761816957 source:c:\users\admin\onedrive\máy tính\pipe puzzle\game.cpp
 	"game.h"
 	<string>
 	<algorithm>
