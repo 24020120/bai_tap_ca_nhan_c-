@@ -37,6 +37,8 @@
 		<Unit filename="game.h" />
 		<Unit filename="grid.cpp" />
 		<Unit filename="grid.h" />
+		<Unit filename="highscore.cpp" />
+		<Unit filename="highscore.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="menu.cpp" />
 		<Unit filename="menu.h" />
