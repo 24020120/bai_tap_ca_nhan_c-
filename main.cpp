@@ -11,7 +11,7 @@
 #include "grid.h"
 #include "menu.h"
 #include "game.h"
-
+#include "highscore.h"
 bool mute = false;
 int gridSize = 6;
 int winSize = gridSize * TS + 2 * OFFSET.x;
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
         Mix_CloseAudio();
         return 1;
     }
-
+    loadHighScore();
     int choice = showMenu(ren);
     if (choice == EXIT) {
         SDL_DestroyRenderer(ren);

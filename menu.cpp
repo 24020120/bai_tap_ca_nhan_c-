@@ -216,7 +216,7 @@ int showWin(SDL_Renderer* ren) {
     TTF_Init();
     TTF_Font* font = TTF_OpenFont("assets/arial.ttf", 48);
     SDL_Color white = {255, 255, 255, 255};
-    SDL_Color green = {100, 255, 100, 255};
+    SDL_Color yellow = {255, 255, 0, 255};
     SDL_Texture* bg = IMG_LoadTexture(ren, "images/background.png");
     if (!bg) return EXIT;
     SDL_Texture* btnReplay = IMG_LoadTexture(ren, "images/replay.png");
@@ -230,18 +230,6 @@ int showWin(SDL_Renderer* ren) {
         return EXIT;
     }
 
-    extern int score;
-    std::string finalScoreText = "Final Score: " + std::to_string(score);
-    SDL_Surface* scoreSurface = TTF_RenderText_Solid(font, finalScoreText.c_str(), white);
-    SDL_Texture* scoreTexture = nullptr;
-    SDL_Rect scoreRect = {winSize / 2 - 100, winSize / 2 - 50, 0, 0};  // Sẽ update width/height sau
-    if (scoreSurface) {
-        scoreTexture = SDL_CreateTextureFromSurface(ren, scoreSurface);
-        scoreRect.w = scoreSurface->w;
-        scoreRect.h = scoreSurface->h;
-        SDL_FreeSurface(scoreSurface);
-    }
-
     const int BW = 70;
     const int BH = 70;
     const int GAP = 50;
@@ -251,6 +239,8 @@ int showWin(SDL_Renderer* ren) {
     SDL_Rect rReplay = {cx - BW - GAP / 2, cy - BH / 2 + 50, BW, BH};
     SDL_Rect rExit = {cx + GAP / 2, cy - BH / 2 + 50, BW, BH};
     SDL_Rect rBg = {0, 0, winSize, winSize};
+    int textY = cy - 150;
+    int textX = cx - 150;
     bool running = true;
     int choice = NONE;
     while (running) {
@@ -282,11 +272,36 @@ int showWin(SDL_Renderer* ren) {
         }
         SDL_RenderClear(ren);
         SDL_RenderCopy(ren, bg, nullptr, &rBg);
+        //extern int score;
+        std::string highScoreText = "High Score: " + std::to_string(highScore);
+        SDL_Surface* highSurface = TTF_RenderText_Solid(font, highScoreText.c_str(), yellow);
+        if (highSurface) {
+            SDL_Texture* highTexture = SDL_CreateTextureFromSurface(ren, highSurface);
+            if (highTexture) {
+                SDL_Rect highRect = {textX, textY + 80, highSurface->w, highSurface->h};
+                SDL_RenderCopy(ren, highTexture, nullptr, &highRect);
+                SDL_DestroyTexture(highTexture);
+            }
+            SDL_FreeSurface(highSurface);
+        }
+        std::string scoreText = "Score: " + std::to_string(score);
+        SDL_Surface* scoreSurface = TTF_RenderText_Solid(font, scoreText.c_str(), white);
+        if (scoreSurface) {
+            SDL_Texture* scoreTexture = SDL_CreateTextureFromSurface(ren, scoreSurface);
+            if (scoreTexture) {
+                SDL_Rect scoreRect = {textX, textY + 40, scoreSurface->w, scoreSurface->h};
+                SDL_RenderCopy(ren, scoreTexture, nullptr, &scoreRect);
+                SDL_DestroyTexture(scoreTexture);
+            }
+            SDL_FreeSurface(scoreSurface);
+        }
         SDL_RenderCopy(ren, winTex, nullptr, &rWin);
         SDL_RenderCopy(ren, btnReplay, nullptr, &rReplay);
         SDL_RenderCopy(ren, btnExit, nullptr, &rExit);
         SDL_RenderPresent(ren);
     }
+    if (font) TTF_CloseFont(font);
+    TTF_Quit();
     SDL_DestroyTexture(bg);
     SDL_DestroyTexture(btnReplay);
     SDL_DestroyTexture(btnExit);

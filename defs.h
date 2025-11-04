@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include <vector>
 #include "pipe.h"
-
+#include "highscore.h"
 class AuthManager;
 
 const int TS = 54;
@@ -20,6 +20,7 @@ const int LOGIN = 6;
 const int REGISTER = 7;
 
 extern int score;
+extern int highScore;
 extern int gridSize;
 extern int winSize;
 extern bool mute;
@@ -36,5 +37,8 @@ int showGuide(SDL_Renderer* ren);
 int showWin(SDL_Renderer* ren);
 int showShop(SDL_Renderer* ren);
 int showLogin(SDL_Renderer* ren);
+
+void loadHighScore();
+void saveHighScore();
 
 #endif

@@ -4,11 +4,13 @@
 #include <cstdlib>
 #include <ctime>
 #include <SDL_ttf.h>
-
+#include <fstream>
+#include "highscore.h"
 extern int rounds;
 extern std::vector<std::vector<Pipe>> grid;
 extern bool mute;
 extern int score;
+extern int highScore;
 void playGame(SDL_Window* win, SDL_Renderer* ren,
               SDL_Texture* bg, SDL_Texture* comp, SDL_Texture* serverTex,
               SDL_Texture* pipeTex, SDL_Texture* glassPipeTex, SDL_Texture* cracksTex,
@@ -221,10 +223,24 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
             SDL_RenderPresent(ren);
             SDL_Delay(16);
         }
-
+            std::string highScoreText = "High: " + std::to_string(highScore);
+            SDL_Surface* highScoreSurface = TTF_RenderText_Solid(font, highScoreText.c_str(), white);
+            if (highScoreSurface) {
+                SDL_Texture* highScoreTexture = SDL_CreateTextureFromSurface(ren, highScoreSurface);
+                if (highScoreTexture) {
+                    SDL_Rect highScoreRect = {winSize - 150, 50, highScoreSurface->w, highScoreSurface->h};  // Dưới score
+                    SDL_RenderCopy(ren, highScoreTexture, nullptr, &highScoreRect);
+                    SDL_DestroyTexture(highScoreTexture);
+                }
+                SDL_FreeSurface(highScoreSurface);
+            }
         if (win) {
             rounds++;
             score+=50;
+            if (score > highScore) {
+                highScore = score;
+                saveHighScore();
+            }
             if (rounds >= 3) {
 
                 int result = showWin(ren);
