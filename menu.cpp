@@ -5,7 +5,7 @@
 #include <SDL_ttf.h>
 #include <string>
 #include <iostream>
-int showMenu(SDL_Renderer* ren) {
+int showMenu(SDL_Renderer* ren, bool hasSaveGame) {
     SDL_Texture*bg=IMG_LoadTexture(ren,"images/background.png");
     SDL_Texture*btnStart=IMG_LoadTexture(ren,"images/start.png");
     SDL_Texture*btnGuide=IMG_LoadTexture(ren,"images/guide.png");
@@ -13,6 +13,13 @@ int showMenu(SDL_Renderer* ren) {
     SDL_Texture*btnExit=IMG_LoadTexture(ren,"images/exit.png");
     SDL_Texture*btnShop=IMG_LoadTexture(ren,"images/shop.png");
     SDL_Texture*btnLogin=IMG_LoadTexture(ren,"images/Login.png");
+
+
+    SDL_Texture* btnContinue = nullptr;
+    if (hasSaveGame) {
+        btnContinue = IMG_LoadTexture(ren, "images/continue.png"); // Bạn cần tạo ảnh này
+    }
+
     const int BW=100;
     const int BH=100;
     const int GAP=50;
@@ -30,6 +37,17 @@ int showMenu(SDL_Renderer* ren) {
     SDL_Rect rShop={MARGIN,winSize-MARGIN-SMALL_BH,SMALL_BW,SMALL_BH};
     SDL_Rect rLogin = {winSize - MARGIN - SMALL_BW, winSize - MARGIN - SMALL_BH, SMALL_BW, SMALL_BH};
 
+
+    SDL_Rect rContinue = {cx - BW/2, cy - BH - GAP - 20, BW, BH};
+    if (!hasSaveGame) {
+
+        rStart.y -= (BH + GAP) / 4;
+        rGuide.y -= (BH + GAP) / 4;
+        rSet.y -= (BH + GAP) / 4;
+        rExit.y -= (BH + GAP) / 4;
+    }
+
+
     bool running=true;
     int choice=NONE;
     while(running) {
@@ -43,7 +61,13 @@ int showMenu(SDL_Renderer* ren) {
             } else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
                 mx = e.button.x;
                 my = e.button.y;
-                if (mx >= rStart.x&& mx <= rStart.x + rStart.w && my >=rStart.y &&my <= rStart.y + rStart.h) {
+
+
+                if (hasSaveGame && btnContinue && mx >= rContinue.x && mx <= rContinue.x + rContinue.w && my >= rContinue.y && my <= rContinue.y + rContinue.h) {
+                    choice = CONTINUE_GAME;
+                    running = false;
+                }
+                else if (mx >= rStart.x&& mx <= rStart.x + rStart.w && my >=rStart.y &&my <= rStart.y + rStart.h) {
                     choice = START;
                     running = false;
                 } else if (mx >= rGuide.x && mx<=rGuide.x + rGuide.w&& my >= rGuide.y&& my <= rGuide.y + rGuide.h) {
@@ -66,8 +90,12 @@ int showMenu(SDL_Renderer* ren) {
         SDL_SetTextureColorMod(btnExit,255,255,255);
         SDL_SetTextureColorMod(btnShop,255,255,255);
         SDL_SetTextureColorMod(btnLogin, 255, 255, 255);
+        if (hasSaveGame && btnContinue) SDL_SetTextureColorMod(btnContinue, 255, 255, 255);
 
-        if (mx >= rStart.x && mx <= rStart.x + rStart.w && my >= rStart.y && my <= rStart.y + rStart.h) {
+        if (hasSaveGame && btnContinue && mx >= rContinue.x && mx <= rContinue.x + rContinue.w && my >= rContinue.y && my <= rContinue.y + rContinue.h) {
+            SDL_SetTextureColorMod(btnContinue, 255, 255, 0);
+        }
+        else if (mx >= rStart.x && mx <= rStart.x + rStart.w && my >= rStart.y && my <= rStart.y + rStart.h) {
             SDL_SetTextureColorMod(btnStart,255,255,0);
         } else if (mx >= rGuide.x && mx <= rGuide.x + rGuide.w && my >= rGuide.y && my <= rGuide.y + rGuide.h) {
             SDL_SetTextureColorMod(btnGuide,255,255,0);
@@ -88,6 +116,8 @@ int showMenu(SDL_Renderer* ren) {
         SDL_RenderCopy(ren,btnExit,nullptr,&rExit);
         SDL_RenderCopy(ren,btnShop,nullptr,&rShop);
         SDL_RenderCopy(ren, btnLogin, nullptr, &rLogin);
+        if (hasSaveGame && btnContinue) SDL_RenderCopy(ren, btnContinue, nullptr, &rContinue); // ✅ [THÊM] Vẽ nút Continue
+
         SDL_RenderPresent(ren);
     }
     SDL_DestroyTexture(bg);
@@ -97,6 +127,7 @@ int showMenu(SDL_Renderer* ren) {
     SDL_DestroyTexture(btnExit);
     SDL_DestroyTexture(btnShop);
     SDL_DestroyTexture(btnLogin);
+    if (btnContinue) SDL_DestroyTexture(btnContinue); // ✅ [THÊM]
     return choice;
 }
 
@@ -413,6 +444,96 @@ int showShop(SDL_Renderer* ren) {
     SDL_DestroyTexture(bg);
     SDL_DestroyTexture(btnBack);
     SDL_DestroyTexture(btnNext);
+    return choice;
+}
+void renderText(SDL_Renderer* ren, TTF_Font* font, const std::string& text, int x, int y, SDL_Color color, bool center = true) {
+    if (!font) return;
+    SDL_Surface* surface = TTF_RenderText_Solid(font, text.c_str(), color);
+    if (!surface) return;
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(ren, surface);
+    SDL_Rect rect = {x, y, surface->w, surface->h};
+    if (center) {
+        rect.x = x - surface->w / 2;
+        rect.y = y - surface->h / 2;
+    }
+    SDL_RenderCopy(ren, texture, nullptr, &rect);
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
+}
+
+int showPauseMenu(SDL_Renderer* ren, TTF_Font* font, int winSize) {
+
+    SDL_Surface* overlaySurface = SDL_CreateRGBSurface(0, winSize, winSize, 32, 0, 0, 0, 0);
+    SDL_FillRect(overlaySurface, NULL, SDL_MapRGBA(overlaySurface->format, 0, 0, 0, 150)); // Màu đen, bán trong suốt
+    SDL_Texture* overlayTex = SDL_CreateTextureFromSurface(ren, overlaySurface);
+    SDL_FreeSurface(overlaySurface);
+
+    SDL_Color white = {255, 255, 255, 255};
+    SDL_Color yellow = {255, 255, 0, 255};
+
+    const int BW = 200;
+    const int BH = 70;
+    const int GAP = 50;
+    const int cx = winSize / 2;
+    const int cy = winSize / 2;
+
+    SDL_Rect rResume = {cx - BW / 2, cy - BH - GAP / 2, BW, BH};
+    SDL_Rect rExit = {cx - BW / 2, cy + GAP / 2, BW, BH};
+
+    bool running = true;
+    int choice = NONE;
+
+    while (running) {
+        SDL_Event e;
+        int mx, my;
+        SDL_GetMouseState(&mx, &my);
+
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_QUIT) {
+                choice = EXIT_FROM_PAUSE; // Coi như thoát
+                running = false;
+            }
+             else if (e.type == SDL_KEYDOWN) {
+                 if (e.key.keysym.sym == SDLK_ESCAPE) { // Nhấn ESC lần nữa để resume
+                    choice = CONTINUE_GAME;
+                    running = false;
+                 }
+            }
+            else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+                mx = e.button.x;
+                my = e.button.y;
+                if (mx >= rResume.x && mx <= rResume.x + rResume.w && my >= rResume.y && my <= rResume.y + rResume.h) {
+                    choice = CONTINUE_GAME;
+                    running = false;
+                } else if (mx >= rExit.x && mx <= rExit.x + rExit.w && my >= rExit.y && my <= rExit.y + rExit.h) {
+                    choice = EXIT_FROM_PAUSE;
+                    running = false;
+                }
+            }
+        }
+
+
+        SDL_RenderCopy(ren, overlayTex, NULL, NULL);
+
+
+        bool hoverResume = (mx >= rResume.x && mx <= rResume.x + rResume.w && my >= rResume.y && my <= rResume.y + rResume.h);
+        bool hoverExit = (mx >= rExit.x && mx <= rExit.x + rExit.w && my >= rExit.y && my <= rExit.y + rExit.h);
+
+        SDL_SetRenderDrawColor(ren, 50, 50, 50, 255); // Nền nút
+        SDL_RenderFillRect(ren, &rResume);
+        SDL_RenderFillRect(ren, &rExit);
+
+        renderText(ren, font, "Resume", rResume.x + BW / 2, rResume.y + BH / 2, hoverResume ? yellow : white, true);
+        renderText(ren, font, "Save & Exit", rExit.x + BW / 2, rExit.y + BH / 2, hoverExit ? yellow : white, true);
+
+
+        renderText(ren, font, "PAUSED", cx, cy - 180, white, true);
+
+        SDL_RenderPresent(ren);
+        SDL_Delay(16);
+    }
+
+    SDL_DestroyTexture(overlayTex);
     return choice;
 }
 /*

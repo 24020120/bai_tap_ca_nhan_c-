@@ -1,6 +1,7 @@
 #ifndef DEFS_H
 #define DEFS_H
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include <vector>
 #include "pipe.h"
 #include "highscore.h"
@@ -18,6 +19,8 @@ const int NONE = 4;
 const int REPLAY = 5;
 const int LOGIN = 6;
 const int REGISTER = 7;
+const int CONTINUE_GAME = 8;
+const int EXIT_FROM_PAUSE = 9;
 
 extern int score;
 extern int highScore;
@@ -31,12 +34,14 @@ Pipe& getPipe(int x, int y);
 bool out(const SDL_Point& pos);
 void flood(const SDL_Point& pos);
 
-int showMenu(SDL_Renderer* ren);
+int showMenu(SDL_Renderer* ren, bool hasSaveGame);
 int showSettings(SDL_Renderer* ren, bool& mute);
 int showGuide(SDL_Renderer* ren);
 int showWin(SDL_Renderer* ren);
 int showShop(SDL_Renderer* ren);
 int showLogin(SDL_Renderer* ren);
+
+int showPauseMenu(SDL_Renderer* ren, TTF_Font* font, int winSize);
 
 void loadHighScore();
 void saveHighScore();

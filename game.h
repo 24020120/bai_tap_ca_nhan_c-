@@ -5,10 +5,13 @@
 #include <SDL_mixer.h>
 #include "grid.h"
 #include "defs.h"
+#include "savegame.h"
+
 
 void playGame(SDL_Window* win, SDL_Renderer* ren,
               SDL_Texture* bg, SDL_Texture* comp, SDL_Texture* serverTex,
               SDL_Texture* pipeTex, SDL_Texture* glassPipeTex, SDL_Texture* cracksTex,
-              SDL_Texture* brokenPipeTex, Mix_Music* music, Mix_Chunk* click);
+              SDL_Texture* brokenPipeTex, Mix_Music* music, Mix_Chunk* click,
+              bool loadFromSave, const GameState& loadedState);
 
 #endif

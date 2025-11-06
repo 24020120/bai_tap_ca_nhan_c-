@@ -5,21 +5,27 @@
 #include <ctime>
 #include <SDL_ttf.h>
 #include <fstream>
+#include <cstdio>
 #include "highscore.h"
+#include "savegame.h"
+
 extern int rounds;
 extern std::vector<std::vector<Pipe>> grid;
 extern bool mute;
 extern int score;
 extern int highScore;
+const int MAX_TIME = 60;
+void renderText(SDL_Renderer* ren, TTF_Font* font, const std::string& text, int x, int y, SDL_Color color, bool center = true);
 void playGame(SDL_Window* win, SDL_Renderer* ren,
               SDL_Texture* bg, SDL_Texture* comp, SDL_Texture* serverTex,
               SDL_Texture* pipeTex, SDL_Texture* glassPipeTex, SDL_Texture* cracksTex,
-              SDL_Texture* brokenPipeTex, Mix_Music* music, Mix_Chunk* click) {
+              SDL_Texture* brokenPipeTex, Mix_Music* music, Mix_Chunk* click,
+              bool loadFromSave, const GameState& loadedState) {
+
     if (music) {
         Mix_PlayMusic(music, -1);
         Mix_VolumeMusic(mute ? 0 : MIX_MAX_VOLUME);
     }
-    SDL_Delay(2000);
 
     bool playing = true;
 
@@ -27,61 +33,89 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
     TTF_Font* font = TTF_OpenFont("assets/arial.ttf", 32);
     SDL_Color white = {255, 255, 255, 255};
 
+
+    SDL_Point serverPos;
+    Uint32 startTime;
+    int remainingTime = MAX_TIME;
+    bool localLoadFromSave = loadFromSave;
+
+    if (localLoadFromSave) {
+
+        serverPos = loadedState.serverPos;
+        remainingTime = loadedState.timeRemaining;
+        std::remove("savegame.json");
+    } else {
+        SDL_Delay(2000);
+    }
+
+
     while (playing) {
         int winSize = gridSize * TS + 2 * OFFSET.x;
         SDL_SetWindowSize(win, winSize, winSize);
-        grid.resize(gridSize, std::vector<Pipe>(gridSize));
-        genGrid();
-        for (int y = 0; y < gridSize; y++) {
-            for (int x = 0; x < gridSize; x++) {
-                Pipe& p = getPipe(x, y);
-                for (int n = 4; n > 0; n--) {
-                    std::string dirStr;
-                    for (auto& d : DIR) {
-                        dirStr += (p.hasDir(d) ? '1' : '0');
-                    }
-                    if (dirStr == "0011" || dirStr == "0111" || dirStr == "0101" || dirStr == "0010") {
-                        p.dir = n;
-                    }
-                    p.rotate();
-                }
-                int randRot = rand() % 4;
-                for (int r = 0; r < randRot; r++) {
-                    p.dir++;
-                    p.rotate();
-                }
-            }
-        }
-        SDL_Point serverPos = {0, 0};
-        do {
-            serverPos.x = rand() % gridSize;
-            serverPos.y = rand() % gridSize;
-        } while (getPipe(serverPos.x, serverPos.y).dirs.size() == 1);
 
-        if (rounds > 1) {
-            int glassPipesToMake = std::min(rounds, (gridSize * gridSize) / 4);
-            int pipesMade = 0;
-            while (pipesMade < glassPipesToMake) {
-                int rx = rand() % gridSize;
-                int ry = rand() % gridSize;
-                if ((rx == serverPos.x && ry == serverPos.y) || getPipe(rx, ry).dirs.empty()) {
-                    continue;
-                }
-                Pipe& p = getPipe(rx, ry);
-                if (p.pipeType == STEEL) {
-                    p.pipeType = GLASS;
-                    p.rotationCount = 0;
-                    p.isBroken = false;
-                    pipesMade++;
+
+        if (localLoadFromSave) {
+
+            localLoadFromSave = false;
+        } else {
+
+            grid.clear();
+            grid.resize(gridSize, std::vector<Pipe>(gridSize));
+            genGrid();
+            for (int y = 0; y < gridSize; y++) {
+                for (int x = 0; x < gridSize; x++) {
+                    Pipe& p = getPipe(x, y);
+                    for (int n = 4; n > 0; n--) {
+                        std::string dirStr;
+                        for (auto& d : DIR) {
+                            dirStr += (p.hasDir(d) ? '1' : '0');
+                        }
+                        if (dirStr == "0011" || dirStr == "0111" || dirStr == "0101" || dirStr == "0010") {
+                            p.dir = n;
+                        }
+                        p.rotate();
+                    }
+                    int randRot = rand() % 4;
+                    for (int r = 0; r < randRot; r++) {
+                        p.dir++;
+                        p.rotate();
+                    }
                 }
             }
+            serverPos = {0, 0};
+            do {
+                serverPos.x = rand() % gridSize;
+                serverPos.y = rand() % gridSize;
+            } while (getPipe(serverPos.x, serverPos.y).dirs.size() == 1);
+
+            if (rounds > 1) {
+                int glassPipesToMake = std::min(rounds, (gridSize * gridSize) / 4);
+                int pipesMade = 0;
+                while (pipesMade < glassPipesToMake) {
+                    int rx = rand() % gridSize;
+                    int ry = rand() % gridSize;
+                    if ((rx == serverPos.x && ry == serverPos.y) || getPipe(rx, ry).dirs.empty()) {
+                        continue;
+                    }
+                    Pipe& p = getPipe(rx, ry);
+                    if (p.pipeType == STEEL) {
+                        p.pipeType = GLASS;
+                        p.rotationCount = 0;
+                        p.isBroken = false;
+                        pipesMade++;
+                    }
+                }
+            }
+            remainingTime = MAX_TIME;
         }
+
+
+        startTime = SDL_GetTicks() - (MAX_TIME - remainingTime) * 1000;
 
         flood(serverPos);
         bool running = true;
         bool win = false;
-        const int MAX_TIME = 60;
-        Uint32 startTime = SDL_GetTicks();
+
         while (running) {
             bool allConnected = true;
             for (int y = 0; y < gridSize; y++) {
@@ -104,7 +138,41 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                 if (e.type == SDL_QUIT) {
                     running = false;
                     playing = false;
-                } else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+                }
+
+                else if (e.type == SDL_KEYDOWN) {
+                    if (e.key.keysym.sym == SDLK_ESCAPE) {
+                        Mix_PauseMusic();
+
+                        int elapsedSeconds = (SDL_GetTicks() - startTime) / 1000;
+                        int timeLeft = MAX_TIME - elapsedSeconds;
+
+                        int pauseChoice = showPauseMenu(ren, font, winSize);
+
+                        Mix_ResumeMusic();
+
+                        if (pauseChoice == CONTINUE_GAME) {
+
+                            startTime = SDL_GetTicks() - (MAX_TIME - timeLeft) * 1000;
+                        } else if (pauseChoice == EXIT_FROM_PAUSE) {
+
+                            GameState state;
+                            state.score = score;
+                            state.timeRemaining = timeLeft;
+                            state.mute = mute;
+                            state.grid = grid;
+                            state.serverPos = serverPos;
+                            state.rounds = rounds;
+                            state.gridSize = gridSize;
+
+                            saveGame(state, "savegame.json");
+
+                            running = false;
+                            playing = false;
+                        }
+                    }
+                }
+                else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
                     int mx = e.button.x + TS / 2 - OFFSET.x;
                     int my = e.button.y + TS / 2 - OFFSET.y;
                     int gx = mx / TS;
@@ -127,7 +195,8 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
 
             Uint32 currentTime = SDL_GetTicks();
             int elapsedSeconds = (currentTime - startTime) / 1000;
-            int remainingTime = MAX_TIME - elapsedSeconds;
+            remainingTime = MAX_TIME - elapsedSeconds;
+
             if (remainingTime <= 0) {
                 running = false;
                 win = false;
@@ -135,6 +204,7 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                 if (result == REPLAY) {
                     gridSize = 6;
                     rounds = 1;
+                    score = 0;
                     grid.clear();
                     grid.resize(gridSize, std::vector<Pipe>(gridSize));
                 } else if (result == EXIT) {
@@ -220,10 +290,7 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                 }
                 SDL_FreeSurface(scoreSurface);
             }
-            SDL_RenderPresent(ren);
-            SDL_Delay(16);
-        }
-            std::string highScoreText = "High: " + std::to_string(highScore);
+             std::string highScoreText = "High: " + std::to_string(highScore);
             SDL_Surface* highScoreSurface = TTF_RenderText_Solid(font, highScoreText.c_str(), white);
             if (highScoreSurface) {
                 SDL_Texture* highScoreTexture = SDL_CreateTextureFromSurface(ren, highScoreSurface);
@@ -234,6 +301,12 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                 }
                 SDL_FreeSurface(highScoreSurface);
             }
+
+            SDL_RenderPresent(ren);
+            SDL_Delay(16);
+        }
+
+
         if (win) {
             rounds++;
             score+=50;
@@ -247,6 +320,7 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                 if (result == REPLAY) {
                     gridSize = 6;
                     rounds = 1;
+                    score = 0;
                     grid.clear();
                     grid.resize(gridSize, std::vector<Pipe>(gridSize));
                 } else if (result == EXIT) {
@@ -254,8 +328,7 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                 }
             } else {
                 gridSize++;
-                grid.clear();
-                grid.resize(gridSize, std::vector<Pipe>(gridSize));
+
             }
         }
     }

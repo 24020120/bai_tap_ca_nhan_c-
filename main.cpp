@@ -7,17 +7,24 @@
 #include <cstdlib>
 #include <ctime>
 #include <string>
+#include <cstdio>
 #include "pipe.h"
 #include "grid.h"
 #include "menu.h"
 #include "game.h"
 #include "highscore.h"
+#include "savegame.h"
+
 bool mute = false;
 int gridSize = 6;
 int winSize = gridSize * TS + 2 * OFFSET.x;
 int rounds = 1;
 int score = 0;
 std::vector<std::vector<Pipe>> grid;
+
+
+extern int highScore;
+
 
 int main(int argc, char* argv[]) {
     srand(static_cast<unsigned>(time(nullptr)));
@@ -33,15 +40,50 @@ int main(int argc, char* argv[]) {
         Mix_CloseAudio();
         return 1;
     }
+
     loadHighScore();
-    int choice = showMenu(ren);
-    if (choice == EXIT) {
+
+
+    GameState loadedState;
+    bool hasSaveGame = loadGame(loadedState, "savegame.json");
+    bool loadFromSave = false;
+
+
+    int choice = showMenu(ren, hasSaveGame);
+
+    if (choice == START) {
+
+        gridSize = 6;
+        rounds = 1;
+        score = 0;
+        mute = false;
+        loadFromSave = false;
+        if (hasSaveGame) {
+            std::remove("savegame.json");
+        }
+    } else if (choice == CONTINUE_GAME) {
+
+        grid = loadedState.grid;
+        score = loadedState.score;
+        mute = loadedState.mute;
+        rounds = loadedState.rounds;
+        gridSize = loadedState.gridSize;
+
+
+        winSize = gridSize * TS + 2 * OFFSET.x;
+        SDL_SetWindowSize(win, winSize, winSize);
+
+        loadFromSave = true;
+    }
+    else if (choice == EXIT) {
         SDL_DestroyRenderer(ren);
         SDL_DestroyWindow(win);
         Mix_CloseAudio();
         SDL_Quit();
         return 0;
     }
+
+
     SDL_Texture* bg = IMG_LoadTexture(ren, "images/background.png");
     SDL_Texture* comp = IMG_LoadTexture(ren, "images/comp.png");
     SDL_Texture* serverTex = IMG_LoadTexture(ren, "images/server.png");
@@ -52,7 +94,10 @@ int main(int argc, char* argv[]) {
     Mix_Music* music = Mix_LoadMUS("mix/music.mp3");
     Mix_Chunk* click = Mix_LoadWAV("mix/click.wav");
 
-    playGame(win, ren, bg, comp, serverTex, pipeTex, glassPipeTex, cracksTex, brokenPipeTex, music, click);
+
+    playGame(win, ren, bg, comp, serverTex, pipeTex, glassPipeTex, cracksTex, brokenPipeTex, music, click,
+             loadFromSave, loadedState);
+
 
     SDL_DestroyTexture(bg);
     SDL_DestroyTexture(comp);
