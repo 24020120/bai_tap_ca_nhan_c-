@@ -4,7 +4,7 @@
 #include <SDL.h>
 extern int score;
 extern int highScore;
-int showMenu(SDL_Renderer* ren, bool hasSaveGame);  // Thêm param
+int showMenu(SDL_Renderer* ren, bool hasSaveGame);
 int showSettings(SDL_Renderer* ren, bool& mute);
 int showGuide(SDL_Renderer* ren);
 int showWin(SDL_Renderer* ren);

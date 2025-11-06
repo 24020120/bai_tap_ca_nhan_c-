@@ -4,7 +4,7 @@ void Pipe::rotate() {
     if (isBroken) return;
     if (pipeType==GLASS) {
         rotationCount++;
-        if (rotationCount>3) {
+        if (rotationCount>4) {
             isBroken=true;
             dirs.clear();
             return;

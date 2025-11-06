@@ -290,9 +290,12 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                 for (int x = 0; x < gridSize; x++) {
                     Pipe& p = grid[y][x];
                     if (p.isBroken) {
+                        continue;
+                    }/*
+                    if (p.isBroken) {
                         SDL_Rect dst = {x * TS + OFFSET.x - 27, y * TS + OFFSET.y - 27, TS, TS};
                         if (brokenPipeTex) SDL_RenderCopy(ren, brokenPipeTex, nullptr, &dst);
-                    }
+                    }*/
                     int type = static_cast<int>(p.dirs.size());
                     if (type == 2 && p.dirs[0].x == -p.dirs[1].x && p.dirs[0].y == -p.dirs[1].y) {
                         type = 0;
@@ -313,14 +316,30 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                     SDL_Rect dst = {x * TS + OFFSET.x - 27, y * TS + OFFSET.y - 27, TS, TS};
                     SDL_Point center = {27, 27};
 
-                    SDL_Texture* texToUse = (p.pipeType == GLASS) ? glassPipeTex : pipeTex;
-                    if (texToUse) {
-                        SDL_RenderCopyEx(ren, texToUse, &src, &dst, p.angle, &center, SDL_FLIP_NONE);
-                    }
-                    if (p.pipeType == GLASS && p.rotationCount > 0 && p.rotationCount <= 3) {
-                        SDL_Rect srcCrack = {(p.rotationCount - 1) * TS, 0, TS, TS};
-                        if (cracksTex) {
-                            SDL_RenderCopyEx(ren, cracksTex, &srcCrack, &dst, p.angle, &center, SDL_FLIP_NONE);
+                    if (p.pipeType == STEEL) {
+                        // 1. Vẽ ống thép (như cũ)
+                        SDL_Rect src = {type * TS, 0, TS, TS};
+                        if (pipeTex) {
+                            SDL_RenderCopyEx(ren, pipeTex, &src, &dst, p.angle, &center, SDL_FLIP_NONE);
+                        }
+                    } else {
+                        // 2. Xử lý ống thủy tinh
+                        if (p.rotationCount == 1 || p.rotationCount == 2) {
+                            // Click 1 & 2: Vẽ 'cracks.png'
+                            // LUÔN LUÔN lấy ảnh từ HÀNG 0
+                            SDL_Rect srcCrack = {type * TS, 0 * TS, TS, TS}; // 0 * TS = Hàng 0
+                            if (cracksTex) {
+                                SDL_RenderCopyEx(ren, cracksTex, &srcCrack, &dst, p.angle, &center, SDL_FLIP_NONE);
+                            }
+                        } else {
+                            // Bao gồm:
+                            // rotationCount == 0 (trạng thái ban đầu)
+                            // rotationCount == 3 (click lần 3)
+                            // => Sẽ vẽ 'glass_pipes.png'
+                            SDL_Rect src = {type * TS, 0, TS, TS};
+                            if (glassPipeTex) {
+                                SDL_RenderCopyEx(ren, glassPipeTex, &src, &dst, p.angle, &center, SDL_FLIP_NONE);
+                            }
                         }
                     }
                     if (p.dirs.size() == 1) {
@@ -339,6 +358,9 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                 std::string timeText = "Time: " + std::to_string(std::max(0, remainingTime));
                 renderText(ren, font, timeText, 20, 20, white, false);
             }
+
+
+
             std::string scoreText = "Score: " + std::to_string(score);
             SDL_Surface* scoreSurface = TTF_RenderText_Solid(font, scoreText.c_str(), white);
             if (scoreSurface) {
@@ -351,12 +373,12 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                 SDL_FreeSurface(scoreSurface);
             }
 
-             std::string highScoreText = "High: " + std::to_string(highScore);
+            std::string highScoreText = "High: " + std::to_string(highScore);
             SDL_Surface* highScoreSurface = TTF_RenderText_Solid(font, highScoreText.c_str(), white);
             if (highScoreSurface) {
                 SDL_Texture* highScoreTexture = SDL_CreateTextureFromSurface(ren, highScoreSurface);
                 if (highScoreTexture) {
-                    SDL_Rect highScoreRect = {winSize - 150, 50, highScoreSurface->w, highScoreSurface->h};  // Dưới score
+                    SDL_Rect highScoreRect = {winSize - 150, 50, highScoreSurface->w, highScoreSurface->h};
                     SDL_RenderCopy(ren, highScoreTexture, nullptr, &highScoreRect);
                     SDL_DestroyTexture(highScoreTexture);
                 }
