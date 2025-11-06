@@ -17,7 +17,7 @@ int showMenu(SDL_Renderer* ren, bool hasSaveGame) {
 
     SDL_Texture* btnContinue = nullptr;
     if (hasSaveGame) {
-        btnContinue = IMG_LoadTexture(ren, "images/continue.png"); // Bạn cần tạo ảnh này
+        btnContinue = IMG_LoadTexture(ren, "images/continue.png");
     }
 
     const int BW=100;
@@ -127,7 +127,7 @@ int showMenu(SDL_Renderer* ren, bool hasSaveGame) {
     SDL_DestroyTexture(btnExit);
     SDL_DestroyTexture(btnShop);
     SDL_DestroyTexture(btnLogin);
-    if (btnContinue) SDL_DestroyTexture(btnContinue); // ✅ [THÊM]
+    if (btnContinue) SDL_DestroyTexture(btnContinue);
     return choice;
 }
 
@@ -381,7 +381,8 @@ int showShop(SDL_Renderer* ren) {
     SDL_DestroyTexture(bg);
     SDL_DestroyTexture(btnBack);
     return choice;
-}int showLogin(SDL_Renderer* ren) {
+}
+int showLogin(SDL_Renderer* ren) {
     SDL_Texture* bg = IMG_LoadTexture(ren, "images/background.png");
     if (!bg) return NONE;
     SDL_Texture* btnBack = IMG_LoadTexture(ren, "images/back.png");
@@ -464,7 +465,7 @@ void renderText(SDL_Renderer* ren, TTF_Font* font, const std::string& text, int 
 int showPauseMenu(SDL_Renderer* ren, TTF_Font* font, int winSize) {
 
     SDL_Surface* overlaySurface = SDL_CreateRGBSurface(0, winSize, winSize, 32, 0, 0, 0, 0);
-    SDL_FillRect(overlaySurface, NULL, SDL_MapRGBA(overlaySurface->format, 0, 0, 0, 150)); // Màu đen, bán trong suốt
+    SDL_FillRect(overlaySurface, NULL, SDL_MapRGBA(overlaySurface->format, 0, 0, 0, 150));
     SDL_Texture* overlayTex = SDL_CreateTextureFromSurface(ren, overlaySurface);
     SDL_FreeSurface(overlaySurface);
 
@@ -490,11 +491,11 @@ int showPauseMenu(SDL_Renderer* ren, TTF_Font* font, int winSize) {
 
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
-                choice = EXIT_FROM_PAUSE; // Coi như thoát
+                choice = EXIT_FROM_PAUSE;
                 running = false;
             }
              else if (e.type == SDL_KEYDOWN) {
-                 if (e.key.keysym.sym == SDLK_ESCAPE) { // Nhấn ESC lần nữa để resume
+                 if (e.key.keysym.sym == SDLK_ESCAPE) {
                     choice = CONTINUE_GAME;
                     running = false;
                  }
@@ -519,7 +520,7 @@ int showPauseMenu(SDL_Renderer* ren, TTF_Font* font, int winSize) {
         bool hoverResume = (mx >= rResume.x && mx <= rResume.x + rResume.w && my >= rResume.y && my <= rResume.y + rResume.h);
         bool hoverExit = (mx >= rExit.x && mx <= rExit.x + rExit.w && my >= rExit.y && my <= rExit.y + rExit.h);
 
-        SDL_SetRenderDrawColor(ren, 50, 50, 50, 255); // Nền nút
+        SDL_SetRenderDrawColor(ren, 50, 50, 50, 255);
         SDL_RenderFillRect(ren, &rResume);
         SDL_RenderFillRect(ren, &rExit);
 

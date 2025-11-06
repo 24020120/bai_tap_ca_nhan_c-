@@ -23,7 +23,7 @@ bool saveGame(const GameState& state, const std::string& filename) {
             p["isBroken"] = pipe.isBroken;
             p["pipeType"] = pipe.pipeType;
             p["rotationCount"] = pipe.rotationCount;
-
+            p["dir"] = pipe.dir;
 
             p["dirs"] = json::array();
             for (auto& d : pipe.dirs) {
@@ -67,6 +67,8 @@ bool loadGame(GameState& state, const std::string& filename) {
                 p.isBroken = jp["isBroken"];
                 p.pipeType = jp["pipeType"];
                 p.rotationCount = jp["rotationCount"];
+                p.dir = jp["dir"];
+                p.angle = (p.dir % 4) * 90.0f;
                 p.dirs.clear();
                 for (auto& jd : jp["dirs"]) {
                     SDL_Point d = {jd["x"], jd["y"]};
