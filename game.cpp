@@ -14,8 +14,15 @@ extern std::vector<std::vector<Pipe>> grid;
 extern bool mute;
 extern int score;
 extern int highScore;
+
+extern int itemRemoveComputer;
+extern int itemFixGlass;
+extern int itemAddTime;
+
 const int MAX_TIME = 60;
+
 void renderText(SDL_Renderer* ren, TTF_Font* font, const std::string& text, int x, int y, SDL_Color color, bool center = true);
+
 void playGame(SDL_Window* win, SDL_Renderer* ren,
               SDL_Texture* bg, SDL_Texture* comp, SDL_Texture* serverTex,
               SDL_Texture* pipeTex, SDL_Texture* glassPipeTex, SDL_Texture* cracksTex,
@@ -32,17 +39,23 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
     TTF_Init();
     TTF_Font* font = TTF_OpenFont("assets/arial.ttf", 32);
     SDL_Color white = {255, 255, 255, 255};
-
-
+    SDL_Color yellow = {255, 255, 0, 255};
+    SDL_Color activeColor = {0, 255, 0, 255};
     SDL_Point serverPos;
     Uint32 startTime;
     int remainingTime = MAX_TIME;
     bool localLoadFromSave = loadFromSave;
 
-    if (localLoadFromSave) {
+    int activeItem = NONE;
 
+    if (localLoadFromSave) {
         serverPos = loadedState.serverPos;
         remainingTime = loadedState.timeRemaining;
+
+        itemRemoveComputer = loadedState.itemRemoveComputer;
+        itemFixGlass = loadedState.itemFixGlass;
+        itemAddTime = loadedState.itemAddTime;
+
         std::remove("savegame.json");
     } else {
         SDL_Delay(2000);
@@ -55,10 +68,8 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
 
 
         if (localLoadFromSave) {
-
             localLoadFromSave = false;
         } else {
-
             grid.clear();
             grid.resize(gridSize, std::vector<Pipe>(gridSize));
             genGrid();
@@ -147,12 +158,13 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                         int elapsedSeconds = (SDL_GetTicks() - startTime) / 1000;
                         int timeLeft = MAX_TIME - elapsedSeconds;
 
+                        activeItem = NONE;
+
                         int pauseChoice = showPauseMenu(ren, font, winSize);
 
                         Mix_ResumeMusic();
 
                         if (pauseChoice == CONTINUE_GAME) {
-
                             startTime = SDL_GetTicks() - (MAX_TIME - timeLeft) * 1000;
                         } else if (pauseChoice == EXIT_FROM_PAUSE) {
 
@@ -165,38 +177,93 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                             state.rounds = rounds;
                             state.gridSize = gridSize;
 
+                            state.itemRemoveComputer = itemRemoveComputer;
+                            state.itemFixGlass = itemFixGlass;
+                            state.itemAddTime = itemAddTime;
+
                             saveGame(state, "savegame.json");
 
                             running = false;
                             playing = false;
                         }
                     }
+                    else if (e.key.keysym.sym == SDLK_1) {
+                        if (itemRemoveComputer > 0) {
+                            if (click) Mix_PlayChannel(-1, click, 0);
+                            activeItem = (activeItem == ITEM_REMOVE_COMPUTER) ? NONE : ITEM_REMOVE_COMPUTER;
+                        }
+                    }
+                    else if (e.key.keysym.sym == SDLK_2) {
+                        if (itemFixGlass > 0) {
+                            if (click) Mix_PlayChannel(-1, click, 0);
+                            activeItem = (activeItem == ITEM_FIX_GLASS) ? NONE : ITEM_FIX_GLASS;
+                        }
+                    }
+                    else if (e.key.keysym.sym == SDLK_3) {
+                        if (itemAddTime > 0) {
+                            if (click) Mix_PlayChannel(-1, click, 0);
+                            itemAddTime--;
+                            startTime += 600000;
+                            activeItem = NONE;
+                        }
+                    }
                 }
                 else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
-                    int mx = e.button.x + TS / 2 - OFFSET.x;
-                    int my = e.button.y + TS / 2 - OFFSET.y;
-                    int gx = mx / TS;
-                    int gy = my / TS;
+                    int mx = e.button.x;
+                    int my = e.button.y;
+
+                    int gx = (mx + TS / 2 - OFFSET.x) / TS;
+                    int gy = (my + TS / 2 - OFFSET.y) / TS;
                     SDL_Point pos = {gx, gy};
+
                     if (!out(pos)) {
-                        if (click) Mix_PlayChannel(-1, click, 0);
                         Pipe& p = getPipe(gx, gy);
-                        p.dir++;
-                        p.rotate();
-                        for (int yy = 0; yy < gridSize; yy++) {
-                            for (int xx = 0; xx < gridSize; xx++) {
-                                grid[yy][xx].on = false;
+
+
+                        if (activeItem == ITEM_REMOVE_COMPUTER) {
+                            if (p.dirs.size() == 1) {
+                                if (click) Mix_PlayChannel(-1, click, 0);
+                                p.dirs.clear();
+                                p.on = false;
+                                itemRemoveComputer--;
+                                activeItem = NONE;
+
+                                for (int yy = 0; yy < gridSize; yy++) {
+                                    for (int xx = 0; xx < gridSize; xx++) grid[yy][xx].on = false;
+                                }
+                                flood(serverPos);
                             }
                         }
-                        flood(serverPos);
+                        else if (activeItem == ITEM_FIX_GLASS) {
+                            if (p.pipeType == GLASS) {
+                                if (click) Mix_PlayChannel(-1, click, 0);
+                                p.pipeType = STEEL;
+                                p.rotationCount = 0;
+                                p.isBroken = false;
+                                itemFixGlass--;
+                                activeItem = NONE;
+                            }
+                        }
+                        else if (activeItem == NONE) {
+
+                            if (click) Mix_PlayChannel(-1, click, 0);
+                            p.dir++;
+                            p.rotate();
+                            for (int yy = 0; yy < gridSize; yy++) {
+                                for (int xx = 0; xx < gridSize; xx++) {
+                                    grid[yy][xx].on = false;
+                                }
+                            }
+                            flood(serverPos);
+                        }
+
                     }
                 }
             }
 
             Uint32 currentTime = SDL_GetTicks();
-            int elapsedSeconds = (currentTime - startTime) / 1000;
+            int elapsedSeconds = (static_cast<Sint64>(currentTime) - static_cast<Sint64>(startTime)) / 1000;
             remainingTime = MAX_TIME - elapsedSeconds;
-
             if (remainingTime <= 0) {
                 running = false;
                 win = false;
@@ -217,6 +284,7 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
 
             SDL_Rect rBg = {0, 0, winSize, winSize};
             SDL_RenderCopy(ren, bg, nullptr, &rBg);
+
 
             for (int y = 0; y < gridSize; y++) {
                 for (int x = 0; x < gridSize; x++) {
@@ -266,18 +334,10 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
             SDL_Rect dstServer = {serverPos.x * TS + OFFSET.x - 20, serverPos.y * TS + OFFSET.y - 20, 40, 40};
             SDL_RenderCopy(ren, serverTex, &srcServer, &dstServer);
 
+
             if (remainingTime > 0 || win) {
                 std::string timeText = "Time: " + std::to_string(std::max(0, remainingTime));
-                SDL_Surface* timeSurface = TTF_RenderText_Solid(font, timeText.c_str(), white);
-                if (timeSurface) {
-                    SDL_Texture* timeTexture = SDL_CreateTextureFromSurface(ren, timeSurface);
-                    if (timeTexture) {
-                        SDL_Rect timeRect = {20, 20, timeSurface->w, timeSurface->h};
-                        SDL_RenderCopy(ren, timeTexture, nullptr, &timeRect);
-                        SDL_DestroyTexture(timeTexture);
-                    }
-                    SDL_FreeSurface(timeSurface);
-                }
+                renderText(ren, font, timeText, 20, 20, white, false);
             }
             std::string scoreText = "Score: " + std::to_string(score);
             SDL_Surface* scoreSurface = TTF_RenderText_Solid(font, scoreText.c_str(), white);
@@ -290,6 +350,7 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                 }
                 SDL_FreeSurface(scoreSurface);
             }
+
              std::string highScoreText = "High: " + std::to_string(highScore);
             SDL_Surface* highScoreSurface = TTF_RenderText_Solid(font, highScoreText.c_str(), white);
             if (highScoreSurface) {
@@ -315,7 +376,7 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                 saveHighScore();
             }
             if (rounds >= 3) {
-
+                activeItem = NONE;
                 int result = showWin(ren);
                 if (result == REPLAY) {
                     gridSize = 6;
@@ -328,7 +389,6 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                 }
             } else {
                 gridSize++;
-
             }
         }
     }

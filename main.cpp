@@ -21,7 +21,9 @@ int winSize = gridSize * TS + 2 * OFFSET.x;
 int rounds = 1;
 int score = 0;
 std::vector<std::vector<Pipe>> grid;
-
+int itemRemoveComputer = 1;
+int itemFixGlass = 1;
+int itemAddTime = 1;
 
 extern int highScore;
 
@@ -58,6 +60,9 @@ int main(int argc, char* argv[]) {
         score = 0;
         mute = false;
         loadFromSave = false;
+        itemRemoveComputer = 1;
+        itemFixGlass = 1;
+        itemAddTime = 1;
         if (hasSaveGame) {
             std::remove("savegame.json");
         }
@@ -68,7 +73,9 @@ int main(int argc, char* argv[]) {
         mute = loadedState.mute;
         rounds = loadedState.rounds;
         gridSize = loadedState.gridSize;
-
+        itemRemoveComputer = loadedState.itemRemoveComputer;
+        itemFixGlass = loadedState.itemFixGlass;
+        itemAddTime = loadedState.itemAddTime;
 
         winSize = gridSize * TS + 2 * OFFSET.x;
         SDL_SetWindowSize(win, winSize, winSize);

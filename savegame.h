@@ -13,6 +13,9 @@ struct GameState {
     std::vector<std::vector<Pipe>> grid;
     int rounds;
     int gridSize;
+    int itemRemoveComputer;
+    int itemFixGlass;
+    int itemAddTime;
 };
 
 bool saveGame(const GameState& state, const std::string& filename);

@@ -21,12 +21,17 @@ const int LOGIN = 6;
 const int REGISTER = 7;
 const int CONTINUE_GAME = 8;
 const int EXIT_FROM_PAUSE = 9;
-
+const int ITEM_REMOVE_COMPUTER = 10;
+const int ITEM_FIX_GLASS = 11;
+const int ITEM_ADD_TIME = 12;
 extern int score;
 extern int highScore;
 extern int gridSize;
 extern int winSize;
 extern bool mute;
+extern int itemRemoveComputer;
+extern int itemFixGlass;
+extern int itemAddTime;
 extern std::vector<std::vector<Pipe>> grid;
 
 void genGrid();

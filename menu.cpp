@@ -544,8 +544,3 @@ int shownext(SDL_Renderer* rea) {
     SDL_Texture* btnext=IMG_LoadTexture("images/next")
 
 }*/
-
-
-
-
-
