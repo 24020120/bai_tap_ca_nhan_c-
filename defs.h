@@ -8,7 +8,7 @@
 class AuthManager;
 
 const int TS = 54;
-const SDL_Point OFFSET = {65, 55};
+const SDL_Point OFFSET = {75, 120};
 const SDL_Point DIR[4] = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
 
 const int START = 0;
@@ -38,7 +38,7 @@ void genGrid();
 Pipe& getPipe(int x, int y);
 bool out(const SDL_Point& pos);
 void flood(const SDL_Point& pos);
-
+bool isComputer (int x,int y);
 int showMenu(SDL_Renderer* ren, bool hasSaveGame);
 int showSettings(SDL_Renderer* ren, bool& mute);
 int showGuide(SDL_Renderer* ren);

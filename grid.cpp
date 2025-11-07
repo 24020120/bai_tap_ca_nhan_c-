@@ -8,7 +8,12 @@ Pipe& getPipe(int x, int y) {
 bool out(const SDL_Point& pos) {
     return pos.x < 0 || pos.x >= gridSize || pos.y < 0 || pos.y >= gridSize;
 }
-
+bool isComputer(int x, int y) {
+    if (out({x, y})) {
+        return false;
+    }
+    return grid[y][x].dirs.size() == 1;
+}
 void genGrid() {
     grid.clear();
     grid.resize(gridSize, std::vector<Pipe>(gridSize));

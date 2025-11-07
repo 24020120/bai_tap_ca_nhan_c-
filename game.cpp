@@ -19,7 +19,7 @@ extern int itemRemoveComputer;
 extern int itemFixGlass;
 extern int itemAddTime;
 
-const int MAX_TIME = 60;
+const int MAX_TIME = 100;
 
 void renderText(SDL_Renderer* ren, TTF_Font* font, const std::string& text, int x, int y, SDL_Color color, bool center = true);
 
@@ -57,7 +57,11 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
         itemAddTime = loadedState.itemAddTime;
 
         std::remove("savegame.json");
-    } else {
+    }else {
+        itemRemoveComputer = 10;
+        itemFixGlass = 10;
+        itemAddTime = 10;
+
         SDL_Delay(2000);
     }
 
@@ -129,16 +133,19 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
 
         while (running) {
             bool allConnected = true;
+            bool hasComputers = false;
             for (int y = 0; y < gridSize; y++) {
                 for (int x = 0; x < gridSize; x++) {
-                    if (grid[y][x].dirs.size() > 0 && !grid[y][x].on) {
-                        allConnected = false;
-                        goto next_y;
+                    if (isComputer(x, y)) {
+                        hasComputers = true;
+                        if (!grid[y][x].on) {
+                            allConnected = false;
+                            goto check_win_done;
+                        }
                     }
                 }
-                next_y:;
-                if (!allConnected) break;
             }
+            check_win_done:;
             if (allConnected) {
                 win = true;
                 running = false;
@@ -317,25 +324,18 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                     SDL_Point center = {27, 27};
 
                     if (p.pipeType == STEEL) {
-                        // 1. Vẽ ống thép (như cũ)
                         SDL_Rect src = {type * TS, 0, TS, TS};
                         if (pipeTex) {
                             SDL_RenderCopyEx(ren, pipeTex, &src, &dst, p.angle, &center, SDL_FLIP_NONE);
                         }
                     } else {
-                        // 2. Xử lý ống thủy tinh
-                        if (p.rotationCount == 1 || p.rotationCount == 2) {
-                            // Click 1 & 2: Vẽ 'cracks.png'
-                            // LUÔN LUÔN lấy ảnh từ HÀNG 0
-                            SDL_Rect srcCrack = {type * TS, 0 * TS, TS, TS}; // 0 * TS = Hàng 0
+                        if (p.rotationCount == 1 || p.rotationCount == 2 ||p.rotationCount == 3) {
+
+                            SDL_Rect srcCrack = {type * TS, 0 * TS, TS, TS};
                             if (cracksTex) {
                                 SDL_RenderCopyEx(ren, cracksTex, &srcCrack, &dst, p.angle, &center, SDL_FLIP_NONE);
                             }
                         } else {
-                            // Bao gồm:
-                            // rotationCount == 0 (trạng thái ban đầu)
-                            // rotationCount == 3 (click lần 3)
-                            // => Sẽ vẽ 'glass_pipes.png'
                             SDL_Rect src = {type * TS, 0, TS, TS};
                             if (glassPipeTex) {
                                 SDL_RenderCopyEx(ren, glassPipeTex, &src, &dst, p.angle, &center, SDL_FLIP_NONE);

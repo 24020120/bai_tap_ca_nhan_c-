@@ -38,7 +38,7 @@ int showMenu(SDL_Renderer* ren, bool hasSaveGame) {
     SDL_Rect rLogin = {winSize - MARGIN - SMALL_BW, winSize - MARGIN - SMALL_BH, SMALL_BW, SMALL_BH};
 
 
-    SDL_Rect rContinue = {cx - BW/2, cy - BH - GAP - 20, BW, BH};
+    SDL_Rect rContinue = {cx - BW/2,cy+GAP/2+4*GAP/2, BW, BH};
     if (!hasSaveGame) {
 
         rStart.y -= (BH + GAP) / 4;
@@ -116,7 +116,7 @@ int showMenu(SDL_Renderer* ren, bool hasSaveGame) {
         SDL_RenderCopy(ren,btnExit,nullptr,&rExit);
         SDL_RenderCopy(ren,btnShop,nullptr,&rShop);
         SDL_RenderCopy(ren, btnLogin, nullptr, &rLogin);
-        if (hasSaveGame && btnContinue) SDL_RenderCopy(ren, btnContinue, nullptr, &rContinue); // ✅ [THÊM] Vẽ nút Continue
+        if (hasSaveGame && btnContinue) SDL_RenderCopy(ren, btnContinue, nullptr, &rContinue);
 
         SDL_RenderPresent(ren);
     }
@@ -260,7 +260,7 @@ int showWin(SDL_Renderer* ren) {
          SDL_DestroyTexture(winTex);
         return EXIT;
     }
-
+//    SDL_Rect rBg={0,0,winSize,winSize};
     const int BW = 70;
     const int BH = 70;
     const int GAP = 50;
@@ -330,6 +330,7 @@ int showWin(SDL_Renderer* ren) {
         SDL_RenderCopy(ren, btnReplay, nullptr, &rReplay);
         SDL_RenderCopy(ren, btnExit, nullptr, &rExit);
         SDL_RenderPresent(ren);
+        SDL_RenderCopy(ren, bg, nullptr, &rBg);
     }
     if (font) TTF_CloseFont(font);
     TTF_Quit();
@@ -463,7 +464,7 @@ void renderText(SDL_Renderer* ren, TTF_Font* font, const std::string& text, int 
 }
 
 int showPauseMenu(SDL_Renderer* ren, TTF_Font* font, int winSize) {
-
+    SDL_Texture*bg=IMG_LoadTexture(ren,"images/background.png");
     SDL_Surface* overlaySurface = SDL_CreateRGBSurface(0, winSize, winSize, 32, 0, 0, 0, 0);
     SDL_FillRect(overlaySurface, NULL, SDL_MapRGBA(overlaySurface->format, 0, 0, 0, 150));
     SDL_Texture* overlayTex = SDL_CreateTextureFromSurface(ren, overlaySurface);
@@ -471,7 +472,7 @@ int showPauseMenu(SDL_Renderer* ren, TTF_Font* font, int winSize) {
 
     SDL_Color white = {255, 255, 255, 255};
     SDL_Color yellow = {255, 255, 0, 255};
-
+    SDL_Rect rBg={0,0,winSize,winSize};
     const int BW = 200;
     const int BH = 70;
     const int GAP = 50;
@@ -519,7 +520,7 @@ int showPauseMenu(SDL_Renderer* ren, TTF_Font* font, int winSize) {
 
         bool hoverResume = (mx >= rResume.x && mx <= rResume.x + rResume.w && my >= rResume.y && my <= rResume.y + rResume.h);
         bool hoverExit = (mx >= rExit.x && mx <= rExit.x + rExit.w && my >= rExit.y && my <= rExit.y + rExit.h);
-
+        SDL_RenderCopy(ren,bg,nullptr,&rBg);
         SDL_SetRenderDrawColor(ren, 50, 50, 50, 255);
         SDL_RenderFillRect(ren, &rResume);
         SDL_RenderFillRect(ren, &rExit);
@@ -533,7 +534,7 @@ int showPauseMenu(SDL_Renderer* ren, TTF_Font* font, int winSize) {
         SDL_RenderPresent(ren);
         SDL_Delay(16);
     }
-
+    SDL_DestroyTexture(bg);
     SDL_DestroyTexture(overlayTex);
     return choice;
 }
