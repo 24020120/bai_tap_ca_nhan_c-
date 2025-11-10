@@ -12,7 +12,14 @@ bool saveGame(const GameState& state, const std::string& filename) {
     j["gridSize"] = state.gridSize;
 
 
+    j["itemRemoveComputer"] = state.itemRemoveComputer;
+    j["itemFixGlass"] = state.itemFixGlass;
+    j["itemAddTime"] = state.itemAddTime;
+
+
     j["serverPos"] = {{"x", state.serverPos.x}, {"y", state.serverPos.y}};
+
+
 
     j["grid"] = json::array();
     for (auto& row : state.grid) {
@@ -54,6 +61,10 @@ bool loadGame(GameState& state, const std::string& filename) {
         state.mute = j["mute"];
         state.rounds = j["rounds"];
         state.gridSize = j["gridSize"];
+
+        state.itemRemoveComputer = j["itemRemoveComputer"];
+        state.itemFixGlass = j["itemFixGlass"];
+        state.itemAddTime = j["itemAddTime"];
 
 
         state.serverPos = {j["serverPos"]["x"], j["serverPos"]["y"]};
