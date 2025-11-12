@@ -66,9 +66,9 @@ int main(int argc, char* argv[]) {
         score = 0;
         mute = false;
         loadFromSave = false;
-        itemRemoveComputer = 1;
-        itemFixGlass = 1;
-        itemAddTime = 1;
+        //itemRemoveComputer = 1;
+        //itemFixGlass = 1;
+        //itemAddTime = 1;
         if (hasSaveGame) {
             std::remove("savegame.json");
         }

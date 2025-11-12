@@ -576,7 +576,7 @@
 	<ctime>
 	<SDL_ttf.h>
 
-1762842545 source:e:\pipe puzzle\game.cpp
+1762981164 source:e:\pipe puzzle\game.cpp
 	"game.h"
 	<string>
 	<algorithm>
@@ -619,7 +619,7 @@
 1762413514 source:e:\pipe puzzle\pipe.cpp
 	"pipe.h"
 
-1762407436 source:e:\pipe puzzle\main.cpp
+1762981416 source:e:\pipe puzzle\main.cpp
 	<iostream>
 	<SDL.h>
 	<SDL_image.h>
@@ -637,7 +637,7 @@
 	"highscore.h"
 	"savegame.h"
 
-1762827506 e:\pipe puzzle\menu.h
+1762981164 e:\pipe puzzle\menu.h
 	"defs.h"
 	<SDL.h>
 

@@ -15,10 +15,10 @@ extern bool mute;
 extern int score;
 extern int highScore;
 
-extern int itemRemoveComputer;
-extern int itemFixGlass;
-extern int itemAddTime;
-extern int activeItem;
+//extern int itemRemoveComputer;
+//extern int itemFixGlass;
+//extern int itemAddTime;
+//extern int activeItem;
 
 const int MAX_TIME = 100;
 
@@ -30,10 +30,10 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
               SDL_Texture* brokenPipeTex, Mix_Music* music, Mix_Chunk* click,
               bool loadFromSave, const GameState& loadedState) {
 
-    if (music) {
+    /*if (music) {
         Mix_PlayMusic(music, -1);
         Mix_VolumeMusic(mute ? 0 : MIX_MAX_VOLUME);
-    }
+    }*/
 
     bool playing = true;
 
@@ -59,9 +59,9 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
 
         std::remove("savegame.json");
     }else {
-        //itemRemoveComputer = 10;
-       // itemFixGlass = 10;
-        //itemAddTime = 10;
+        itemRemoveComputer ;
+        itemFixGlass ;
+        itemAddTime;
 
         SDL_Delay(2000);
     }
