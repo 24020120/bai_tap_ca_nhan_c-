@@ -30,6 +30,7 @@ extern int highScore;
 
 int main(int argc, char* argv[]) {
     srand(static_cast<unsigned>(time(nullptr)));
+
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
         std::cout << Mix_GetError() << std::endl;
         return 1;
@@ -41,6 +42,11 @@ int main(int argc, char* argv[]) {
         SDL_DestroyWindow(win);
         Mix_CloseAudio();
         return 1;
+    }
+     Mix_Music* music = Mix_LoadMUS("mix/music.mp3");
+     if (music) {
+        Mix_PlayMusic(music, -1);
+        Mix_VolumeMusic(mute ? 0 : MIX_MAX_VOLUME);
     }
 
     loadHighScore();
@@ -98,7 +104,7 @@ int main(int argc, char* argv[]) {
     SDL_Texture* glassPipeTex = IMG_LoadTexture(ren, "images/glass_pipes.png");
     SDL_Texture* cracksTex = IMG_LoadTexture(ren, "images/cracks.png");
     SDL_Texture* brokenPipeTex = IMG_LoadTexture(ren, "images/broken_pipe.png");
-    Mix_Music* music = Mix_LoadMUS("mix/music.mp3");
+
     Mix_Chunk* click = Mix_LoadWAV("mix/click.wav");
 
 

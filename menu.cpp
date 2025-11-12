@@ -352,9 +352,7 @@ int showShop(SDL_Renderer* ren) {
     TTF_Font* font = TTF_OpenFont("assets/arial.ttf", 48);
     SDL_Color textColor = { 255, 255, 255, 255 };
 
-    int qtyRemove = 5;
-    int qtyFix = 2;
-    int qtyTime = 1;
+
 
     const int BW = 70;
     const int BH = 50;
@@ -375,12 +373,12 @@ int showShop(SDL_Renderer* ren) {
 
 
 
-    const int TEXT_W = 50;
-    const int TEXT_H = 40;
-    const int text_offset_x = 5;
-    SDL_Rect rTextRemove = { rItemRemoveComputer.x + ITEM_W + text_offset_x, rItemRemoveComputer.y + (ITEM_H - TEXT_H) / 2, TEXT_W, TEXT_H };
-    SDL_Rect rTextFix = { rItemFixGlass.x + ITEM_W + text_offset_x, rItemFixGlass.y + (ITEM_H - TEXT_H) / 2, TEXT_W, TEXT_H };
-    SDL_Rect rTextTime = { rItemAddTime.x + ITEM_W + text_offset_x, rItemAddTime.y + (ITEM_H - TEXT_H) / 2, TEXT_W, TEXT_H };
+    const int TEXT_W = 30;
+    const int TEXT_H = 20;
+
+    SDL_Rect rTextRemove = { rItemRemoveComputer.x +15 , rItemRemoveComputer.y + 10 + (ITEM_H - TEXT_H) , TEXT_W, TEXT_H };
+    SDL_Rect rTextFix = { rItemFixGlass.x +15, rItemFixGlass.y + 10 + (ITEM_H - TEXT_H) , TEXT_W, TEXT_H };
+    SDL_Rect rTextTime = { rItemAddTime.x +15, rItemAddTime.y + 10 + (ITEM_H - TEXT_H) , TEXT_W, TEXT_H };
 
 
     bool running = true;
@@ -409,115 +407,116 @@ int showShop(SDL_Renderer* ren) {
                     running = false;
                 }
 
+
                 else if (mx >= rItemRemoveComputer.x && mx <= rItemRemoveComputer.x + rItemRemoveComputer.w &&
                          my >= rItemRemoveComputer.y && my <= rItemRemoveComputer.y + rItemRemoveComputer.h) {
 
-                    qtyRemove++;
+                    itemRemoveComputer++;
 
                 }
                 else if (mx >= rItemFixGlass.x && mx <= rItemFixGlass.x + rItemFixGlass.w &&
                          my >= rItemFixGlass.y && my <= rItemFixGlass.y + rItemFixGlass.h) {
-                    // Xử lý mua item 2
-                    qtyFix++;
-                    printf("Clicked Item 2! Quantity now: %d\n", qtyFix);
+
+                    itemFixGlass++;
+
                 }
                 else if (mx >= rItemAddTime.x && mx <= rItemAddTime.x + rItemAddTime.w &&
                          my >= rItemAddTime.y && my <= rItemAddTime.y + rItemAddTime.h) {
-                    // Xử lý mua item 3
-                    qtyTime++;
-                    printf("Clicked Item 3! Quantity now: %d\n", qtyTime);
+
+                    itemAddTime++;
+
                 }
             }
         }
 
-        // --- Tạo lại text textures nếu cần (mỗi frame để cập nhật qty nếu thay đổi)
-        // Text cho Remove
+
         if (textRemoveTex) {
             SDL_DestroyTexture(textRemoveTex);
             textRemoveTex = NULL;
         }
-        sprintf(qtyTextBuffer, "x%d", qtyRemove);
+
+        sprintf(qtyTextBuffer, "x%d", itemRemoveComputer);
         SDL_Surface* surfaceRemove = TTF_RenderText_Solid(font, qtyTextBuffer, textColor);
         if (surfaceRemove) {
             textRemoveTex = SDL_CreateTextureFromSurface(ren, surfaceRemove);
             SDL_FreeSurface(surfaceRemove);
         }
 
-        // Text cho Fix
+
         if (textFixTex) {
             SDL_DestroyTexture(textFixTex);
             textFixTex = NULL;
         }
-        sprintf(qtyTextBuffer, "x%d", qtyFix);
+
+        sprintf(qtyTextBuffer, "x%d", itemFixGlass);
         SDL_Surface* surfaceFix = TTF_RenderText_Solid(font, qtyTextBuffer, textColor);
         if (surfaceFix) {
             textFixTex = SDL_CreateTextureFromSurface(ren, surfaceFix);
             SDL_FreeSurface(surfaceFix);
         }
 
-        // Text cho Time
+
         if (textTimeTex) {
             SDL_DestroyTexture(textTimeTex);
             textTimeTex = NULL;
         }
-        sprintf(qtyTextBuffer, "x%d", qtyTime);
+
+        sprintf(qtyTextBuffer, "x%d", itemAddTime);
         SDL_Surface* surfaceTime = TTF_RenderText_Solid(font, qtyTextBuffer, textColor);
         if (surfaceTime) {
             textTimeTex = SDL_CreateTextureFromSurface(ren, surfaceTime);
             SDL_FreeSurface(surfaceTime);
         }
 
-        // --- Logic Hover (Đổi màu) ---
-        SDL_SetTextureColorMod(btnBack, 255, 255, 255); // Reset
-        SDL_SetTextureColorMod(itemRemoveTex, 255, 255, 255);
-        SDL_SetTextureColorMod(itemFixTex, 255, 255, 255);
-        SDL_SetTextureColorMod(itemTimeTex, 255, 255, 255);
+
+        SDL_SetTextureColorMod(btnBack, 255, 255, 255);
+        if (itemRemoveTex) SDL_SetTextureColorMod(itemRemoveTex, 255, 255, 255);
+        if (itemFixTex) SDL_SetTextureColorMod(itemFixTex, 255, 255, 255);
+        if (itemTimeTex) SDL_SetTextureColorMod(itemTimeTex, 255, 255, 255);
 
         if (mx >= rBack.x && mx <= rBack.x + rBack.w && my >= rBack.y && my <= rBack.y + rBack.h) {
-            SDL_SetTextureColorMod(btnBack, 255, 255, 0); // Hover Vàng
+            SDL_SetTextureColorMod(btnBack, 255, 255, 0);
         }
-        // <<< Thêm hover cho 3 item
-        else if (mx >= rItemRemoveComputer.x && mx <= rItemRemoveComputer.x + rItemRemoveComputer.w &&
+        else if (itemRemoveTex && mx >= rItemRemoveComputer.x && mx <= rItemRemoveComputer.x + rItemRemoveComputer.w &&
                  my >= rItemRemoveComputer.y && my <= rItemRemoveComputer.y + rItemRemoveComputer.h) {
             SDL_SetTextureColorMod(itemRemoveTex, 255, 255, 0);
         }
-        else if (mx >= rItemFixGlass.x && mx <= rItemFixGlass.x + rItemFixGlass.w &&
+        else if (itemFixTex && mx >= rItemFixGlass.x && mx <= rItemFixGlass.x + rItemFixGlass.w &&
                  my >= rItemFixGlass.y && my <= rItemFixGlass.y + rItemFixGlass.h) {
             SDL_SetTextureColorMod(itemFixTex, 255, 255, 0);
         }
-        else if (mx >= rItemAddTime.x && mx <= rItemAddTime.x + rItemAddTime.w &&
+        else if (itemTimeTex && mx >= rItemAddTime.x && mx <= rItemAddTime.x + rItemAddTime.w &&
                  my >= rItemAddTime.y && my <= rItemAddTime.y + rItemAddTime.h) {
             SDL_SetTextureColorMod(itemTimeTex, 255, 255, 0);
         }
 
-        // --- Vẽ (Render) ---
+
         SDL_RenderClear(ren);
         SDL_RenderCopy(ren, bg, nullptr, &rBg);
         SDL_RenderCopy(ren, btnBack, nullptr, &rBack);
 
-        // <<< Vẽ 3 item bằng texture riêng
-        SDL_RenderCopy(ren, itemRemoveTex, nullptr, &rItemRemoveComputer);
-        SDL_RenderCopy(ren, itemFixTex, nullptr, &rItemFixGlass);
-        SDL_RenderCopy(ren, itemTimeTex, nullptr, &rItemAddTime);
 
-        // Vẽ text số lượng
+        if (itemRemoveTex) SDL_RenderCopy(ren, itemRemoveTex, nullptr, &rItemRemoveComputer);
+        if (itemFixTex) SDL_RenderCopy(ren, itemFixTex, nullptr, &rItemFixGlass);
+        if (itemTimeTex) SDL_RenderCopy(ren, itemTimeTex, nullptr, &rItemAddTime);
+
+
         if (textRemoveTex) SDL_RenderCopy(ren, textRemoveTex, nullptr, &rTextRemove);
         if (textFixTex) SDL_RenderCopy(ren, textFixTex, nullptr, &rTextFix);
         if (textTimeTex) SDL_RenderCopy(ren, textTimeTex, nullptr, &rTextTime);
 
-        SDL_RenderPresent(ren);  // Hiển thị frame
+        SDL_RenderPresent(ren);
     }
 
-    // Cleanup
     if (textRemoveTex) SDL_DestroyTexture(textRemoveTex);
     if (textFixTex) SDL_DestroyTexture(textFixTex);
     if (textTimeTex) SDL_DestroyTexture(textTimeTex);
 
     SDL_DestroyTexture(bg);
     SDL_DestroyTexture(btnBack);
-    SDL_DestroyTexture(itemRemoveTex);
-    SDL_DestroyTexture(itemFixTex);
-    SDL_DestroyTexture(itemTimeTex);
+    if (itemRemoveTex) SDL_DestroyTexture(itemRemoveTex);
+    if (itemFixTex) SDL_DestroyTexture(itemFixTex);
+    if (itemTimeTex) SDL_DestroyTexture(itemTimeTex);
     TTF_CloseFont(font);
 
     return choice;
@@ -527,7 +526,7 @@ int showLogin(SDL_Renderer* ren) {
     if (!bg) return NONE;
     SDL_Texture* btnBack = IMG_LoadTexture(ren, "images/back.png");
     SDL_Texture* btnNext = IMG_LoadTexture(ren, "images/next.png");
-    // ĐÃ XÓA CÁC DÒNG HỦY TEXTURE VÀ RETURN Ở ĐÂY
+
 
     const int BW = 70;
     const int BH = 70;
@@ -578,7 +577,7 @@ int showLogin(SDL_Renderer* ren) {
         SDL_Delay(16);
     }
 
-    // CHUYỂN PHẦN DỌN DẸP XUỐNG ĐÂY
+
     SDL_DestroyTexture(bg);
     SDL_DestroyTexture(btnBack);
     SDL_DestroyTexture(btnNext);

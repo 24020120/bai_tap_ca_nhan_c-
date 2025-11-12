@@ -18,6 +18,7 @@ extern int highScore;
 extern int itemRemoveComputer;
 extern int itemFixGlass;
 extern int itemAddTime;
+extern int activeItem;
 
 const int MAX_TIME = 100;
 
@@ -58,9 +59,9 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
 
         std::remove("savegame.json");
     }else {
-        itemRemoveComputer = 10;
-        itemFixGlass = 10;
-        itemAddTime = 10;
+        //itemRemoveComputer = 10;
+       // itemFixGlass = 10;
+        //itemAddTime = 10;
 
         SDL_Delay(2000);
     }
