@@ -17,6 +17,9 @@ bool saveGame(const GameState& state, const std::string& filename) {
     j["itemAddTime"] = state.itemAddTime;
 
 
+    j["coins"] = state.coins;
+
+
     j["serverPos"] = {{"x", state.serverPos.x}, {"y", state.serverPos.y}};
 
 
@@ -65,6 +68,9 @@ bool loadGame(GameState& state, const std::string& filename) {
         state.itemRemoveComputer = j["itemRemoveComputer"];
         state.itemFixGlass = j["itemFixGlass"];
         state.itemAddTime = j["itemAddTime"];
+
+
+        state.coins = j.value("coins", 0);
 
 
         state.serverPos = {j["serverPos"]["x"], j["serverPos"]["y"]};

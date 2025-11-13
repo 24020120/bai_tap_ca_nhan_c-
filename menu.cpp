@@ -379,7 +379,7 @@ int showShop(SDL_Renderer* ren) {
     SDL_Rect rTextRemove = { rItemRemoveComputer.x +15 , rItemRemoveComputer.y + 10 + (ITEM_H - TEXT_H) , TEXT_W, TEXT_H };
     SDL_Rect rTextFix = { rItemFixGlass.x +15, rItemFixGlass.y + 10 + (ITEM_H - TEXT_H) , TEXT_W, TEXT_H };
     SDL_Rect rTextTime = { rItemAddTime.x +15, rItemAddTime.y + 10 + (ITEM_H - TEXT_H) , TEXT_W, TEXT_H };
-
+    SDL_Rect rTotalCoins = { cx, 60, 0, 0 };
 
     bool running = true;
     int choice = NONE;
@@ -387,7 +387,7 @@ int showShop(SDL_Renderer* ren) {
     SDL_Texture* textRemoveTex = NULL;
     SDL_Texture* textFixTex = NULL;
     SDL_Texture* textTimeTex = NULL;
-
+    SDL_Texture* coinsTex = NULL;
     while (running) {
         SDL_Event e;
         int mx, my;
@@ -410,19 +410,31 @@ int showShop(SDL_Renderer* ren) {
 
                 else if (mx >= rItemRemoveComputer.x && mx <= rItemRemoveComputer.x + rItemRemoveComputer.w &&
                          my >= rItemRemoveComputer.y && my <= rItemRemoveComputer.y + rItemRemoveComputer.h) {
-
-                    itemRemoveComputer++;
+                        if (coins >= PRICE_REMOVE_COMPUTER) {
+                            coins -= PRICE_REMOVE_COMPUTER;
+                            itemRemoveComputer++;
+                            saveCoins();
+                        }
+                        itemRemoveComputer++;
 
                 }
                 else if (mx >= rItemFixGlass.x && mx <= rItemFixGlass.x + rItemFixGlass.w &&
                          my >= rItemFixGlass.y && my <= rItemFixGlass.y + rItemFixGlass.h) {
-
+                        if (coins >= PRICE_FIX_GLASS) {
+                            coins -= PRICE_FIX_GLASS;
+                            itemFixGlass++;
+                            saveCoins();
+                        }
                     itemFixGlass++;
 
                 }
                 else if (mx >= rItemAddTime.x && mx <= rItemAddTime.x + rItemAddTime.w &&
                          my >= rItemAddTime.y && my <= rItemAddTime.y + rItemAddTime.h) {
-
+                        if (coins >= PRICE_ADD_TIME) {
+                            coins -= PRICE_ADD_TIME;
+                            itemAddTime++;
+                            saveCoins();
+                        }
                     itemAddTime++;
 
                 }
@@ -469,6 +481,22 @@ int showShop(SDL_Renderer* ren) {
         }
 
 
+
+        if (coinsTex) {
+            SDL_DestroyTexture(coinsTex);
+            coinsTex = NULL;
+        }
+        //char coinsBuffer[20];
+        sprintf(qtyTextBuffer, "Coins: %d", coins);
+        SDL_Surface* coinsSurface = TTF_RenderText_Solid(font, qtyTextBuffer, textColor);
+        if (coinsSurface) {
+            coinsTex = SDL_CreateTextureFromSurface(ren, coinsSurface);
+            rTotalCoins.w = coinsSurface->w;
+            rTotalCoins.h = coinsSurface->h;
+            SDL_FreeSurface(coinsSurface);
+        }
+
+
         SDL_SetTextureColorMod(btnBack, 255, 255, 255);
         if (itemRemoveTex) SDL_SetTextureColorMod(itemRemoveTex, 255, 255, 255);
         if (itemFixTex) SDL_SetTextureColorMod(itemFixTex, 255, 255, 255);
@@ -495,7 +523,7 @@ int showShop(SDL_Renderer* ren) {
         SDL_RenderCopy(ren, bg, nullptr, &rBg);
         SDL_RenderCopy(ren, btnBack, nullptr, &rBack);
 
-
+        if (coinsTex) {SDL_RenderCopy(ren, coinsTex, nullptr, &rTotalCoins);}
         if (itemRemoveTex) SDL_RenderCopy(ren, itemRemoveTex, nullptr, &rItemRemoveComputer);
         if (itemFixTex) SDL_RenderCopy(ren, itemFixTex, nullptr, &rItemFixGlass);
         if (itemTimeTex) SDL_RenderCopy(ren, itemTimeTex, nullptr, &rItemAddTime);
@@ -518,7 +546,7 @@ int showShop(SDL_Renderer* ren) {
     if (itemFixTex) SDL_DestroyTexture(itemFixTex);
     if (itemTimeTex) SDL_DestroyTexture(itemTimeTex);
     TTF_CloseFont(font);
-
+    if (coinsTex) SDL_DestroyTexture(coinsTex);
     return choice;
 }
 int showLogin(SDL_Renderer* ren) {
@@ -674,6 +702,7 @@ int showPauseMenu(SDL_Renderer* ren, TTF_Font* font, int winSize) {
     SDL_DestroyTexture(overlayTex);
     return choice;
 }
+
 /*
 int shownext(SDL_Renderer* rea) {
     SDL_Texture* bg=IMG_LoadTexture("images/backgroundNext.png");

@@ -16,6 +16,7 @@ struct GameState {
     int itemRemoveComputer;
     int itemFixGlass;
     int itemAddTime;
+    int coins;
 };
 
 bool saveGame(const GameState& state, const std::string& filename);

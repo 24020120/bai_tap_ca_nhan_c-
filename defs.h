@@ -10,7 +10,9 @@ class AuthManager;
 const int TS = 54;
 const SDL_Point OFFSET = {75, 120};
 const SDL_Point DIR[4] = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
-
+const int PRICE_REMOVE_COMPUTER = 30;
+const int PRICE_FIX_GLASS = 40;
+const int PRICE_ADD_TIME = 25;
 const int START = 0;
 const int GUIDE = 1;
 const int SETTINGS = 2;
@@ -35,6 +37,9 @@ extern bool mute;
 extern int itemRemoveComputer;
 extern int itemFixGlass;
 extern int itemAddTime;
+extern int coins;
+void loadCoins();
+void saveCoins();
 extern std::vector<std::vector<Pipe>> grid;
 
 void genGrid();

@@ -56,7 +56,7 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
         itemRemoveComputer = loadedState.itemRemoveComputer;
         itemFixGlass = loadedState.itemFixGlass;
         itemAddTime = loadedState.itemAddTime;
-
+        coins = loadedState.coins;
         std::remove("savegame.json");
     }else {
         itemRemoveComputer ;
@@ -184,7 +184,7 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                             state.serverPos = serverPos;
                             state.rounds = rounds;
                             state.gridSize = gridSize;
-
+                            state.coins = coins;
                             state.itemRemoveComputer = itemRemoveComputer;
                             state.itemFixGlass = itemFixGlass;
                             state.itemAddTime = itemAddTime;
@@ -386,6 +386,19 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
                 SDL_FreeSurface(highScoreSurface);
             }
 
+
+            std::string coinsText = "Coins: " + std::to_string(coins);
+            SDL_Surface* coinsSurface = TTF_RenderText_Solid(font, coinsText.c_str(), white);
+            if (coinsSurface) {
+                SDL_Texture* coinsTexture = SDL_CreateTextureFromSurface(ren, coinsSurface);
+                if (coinsTexture) {
+                    SDL_Rect coinsRect = {winSize - 150, 80, coinsSurface->w, coinsSurface->h};
+                    SDL_RenderCopy(ren, coinsTexture, nullptr, &coinsRect);
+                    SDL_DestroyTexture(coinsTexture);
+                }
+                SDL_FreeSurface(coinsSurface);
+            }
+
             SDL_RenderPresent(ren);
             SDL_Delay(16);
         }
@@ -394,9 +407,12 @@ void playGame(SDL_Window* win, SDL_Renderer* ren,
         if (win) {
             rounds++;
             score+=50;
+            int timeBonus = remainingTime * 5;
+            coins += 50 + timeBonus;
             if (score > highScore) {
                 highScore = score;
                 saveHighScore();
+                coins += 100;
             }
             if (rounds >= 3) {
                 activeItem = NONE;

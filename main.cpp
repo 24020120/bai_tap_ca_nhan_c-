@@ -14,7 +14,7 @@
 #include "game.h"
 #include "highscore.h"
 #include "savegame.h"
-
+#include <fstream>
 bool mute = false;
 int gridSize = 6;
 int winSize = gridSize * TS + 2 * OFFSET.x;
@@ -24,8 +24,27 @@ std::vector<std::vector<Pipe>> grid;
 int itemRemoveComputer = 1;
 int itemFixGlass = 1;
 int itemAddTime = 1;
-
+int coins = 0;
 extern int highScore;
+void loadCoins() {
+        std::ifstream file("coins.txt");
+        if (file.is_open()) {
+            file >> coins;
+            file.close();
+            std::cout << "Loaded coins: " << coins << std::endl;
+        } else {
+        coins = 0;
+        }
+    }
+
+    void saveCoins() {
+        std::ofstream file("coins.txt");
+        if (file.is_open()) {
+            file << coins;
+            file.close();
+            std::cout << "Saved coins: " << coins << std::endl;
+        }
+    }
 
 
 int main(int argc, char* argv[]) {
@@ -50,7 +69,7 @@ int main(int argc, char* argv[]) {
     }
 
     loadHighScore();
-
+    loadCoins();
 
     GameState loadedState;
     bool hasSaveGame = loadGame(loadedState, "savegame.json");
@@ -112,6 +131,8 @@ int main(int argc, char* argv[]) {
              loadFromSave, loadedState);
 
 
+    saveCoins();
+
     SDL_DestroyTexture(bg);
     SDL_DestroyTexture(comp);
     SDL_DestroyTexture(serverTex);
@@ -125,5 +146,7 @@ int main(int argc, char* argv[]) {
     SDL_DestroyWindow(win);
     Mix_CloseAudio();
     SDL_Quit();
+
+
     return 0;
 }
