@@ -1,5 +1,6 @@
 Game: Pipe Puzzle
 * Giới thiệu
+* <img width="1418" height="846" alt="image" src="https://github.com/user-attachments/assets/9534ad8b-6305-4541-a2d7-770bb5c97d57" />
 <img width="548" height="627" alt="image" src="https://github.com/user-attachments/assets/f42b7445-fd4a-4d9d-a7c0-48d2b6765e2a" />
 <img width="597" height="596" alt="image" src="https://github.com/user-attachments/assets/b95b2bcb-2328-4350-9bd7-62b9adb97540" />
 
